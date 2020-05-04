@@ -1,0 +1,2 @@
+org.liquibase.lockservice.ext.MySQLLockService
+org.liquibase.lockservice.ext.PGLockService

@@ -16,7 +16,7 @@ may not be really feasible.
 ## Supported Databases
 
 -   MySQL
--   PostgreSQL
+-   PostgreSQL (pending [`listLocks`](https://www.liquibase.org/documentation/command_line.html) support)
 
 Support for other databases may be conveniently added by extending `SessionLockService`.
 

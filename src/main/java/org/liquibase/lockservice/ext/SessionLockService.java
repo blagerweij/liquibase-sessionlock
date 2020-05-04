@@ -7,6 +7,7 @@ package org.liquibase.lockservice.ext;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+import liquibase.Scope;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.jvm.JdbcConnection;
@@ -14,7 +15,7 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.LockException;
 import liquibase.lockservice.DatabaseChangeLogLock;
 import liquibase.lockservice.StandardLockService;
-import liquibase.logging.LogService;
+import liquibase.logging.Logger;
 
 /**
  * Abstract base for {@code LockService} implementations that provide
@@ -80,7 +81,7 @@ public abstract class SessionLockService extends StandardLockService {
         try {
             if (acquireLock(getConnection())) {
                 hasChangeLogLock = true;
-                LogService.getLog(getClass())
+                getLog(getClass())
                         .info("Successfully acquired change log lock");
                 database.setCanCacheLiquibaseTableInfo(true);
                 return true;
@@ -110,7 +111,7 @@ public abstract class SessionLockService extends StandardLockService {
     public void releaseLock() throws LockException {
         try {
             releaseLock(getConnection());
-            LogService.getLog(getClass())
+            getLog(getClass())
                     .info("Successfully released change log lock");
         } catch (SQLException e) {
             throw new LockException(e);
@@ -158,6 +159,14 @@ public abstract class SessionLockService extends StandardLockService {
             throws SQLException, LockException
     {
         return null;
+    }
+
+    /*
+     * XXX: Liquibase 4.0 breaks LogService API. Try making this backward-compatible.
+     */
+    protected static Logger getLog(Class<?> clazz) {
+        //return LogService.getLog(clazz);
+        return Scope.getCurrentScope().getLog(clazz);
     }
 
 }

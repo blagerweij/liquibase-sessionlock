@@ -14,7 +14,6 @@ import liquibase.database.core.PostgresDatabase;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LockException;
 import liquibase.lockservice.DatabaseChangeLogLock;
-import liquibase.logging.LogService;
 
 /**
  * Employs PostgreSQL <i>advisory locks</i>.
@@ -51,7 +50,7 @@ public class PGLockService extends SessionLockService {
                     || (database.getDatabaseMajorVersion() == 9
                             && database.getDatabaseMinorVersion() >= 1);
         } catch (DatabaseException e) {
-            LogService.getLog(PGLockService.class)
+            getLog(PGLockService.class)
                     .warning("Problem querying database version", e);
             return false;
         }

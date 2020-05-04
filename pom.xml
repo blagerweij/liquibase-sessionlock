@@ -16,6 +16,7 @@
 
     <name>Liquibase Session Lock</name>
     <description>Liquibase Extension proving session-level LockService implementations.</description>
+    <url>https://github.com/stanio/liquibase-sessionlock</url>
     <licenses>
         <license>
             <name>Public Domain</name>
@@ -30,7 +31,7 @@
         <javadoc.quiet>true</javadoc.quiet>
         <javadoc.debug>false</javadoc.debug>
         <javadoc.includeDependencySources>false</javadoc.includeDependencySources>
-        <liquibase.version>3.8.5</liquibase.version>
+        <liquibase.version>4.0.0-beta1</liquibase.version>
     </properties>
 
     <dependencies>
