@@ -16,9 +16,12 @@ may not be really feasible.
 ## Supported Databases
 
 -   MySQL
--   PostgreSQL (pending [`listLocks`](https://www.liquibase.org/documentation/command_line.html) support)
+-   PostgreSQL
 
-Support for other databases may be conveniently added by extending `SessionLockService`.
+Support for other databases may be conveniently added by extending `SessionLockService`.  For Oracle one may look at:
+
+-   [DBMS_LOCK](https://docs.oracle.com/en/database/oracle/oracle-database/12.2/arpls/DBMS_LOCK.html) (Database PL/SQL Packages and Types Reference)
+-   [Using Oracle Lock Management Services (User Locks)](https://www.oracle.com/pls/topic/lookup?ctx=en/database/oracle/oracle-database/12.2/arpls&id=ADFNS-GUID-57365E45-5F85-471B-81D9-F52EA16F1E85)
 
 ## Disclaimer
 

@@ -11,12 +11,14 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -85,9 +87,7 @@ public class PGLockServiceTest {
         when(dbCon.prepareStatement(PGLockService.SQL_TRY_LOCK)).thenReturn(stmt);
 
         assertEquals("acquireLock", true, lockService.acquireLock());
-        // test_schema.databasechangeloglock
-        final long lockId = 0xF0B205EE_A6BFFB24L;
-        verify(stmt).setLong(1, lockId);
+        verifyLockParameters(stmt);
     }
 
     @Test
@@ -110,9 +110,7 @@ public class PGLockServiceTest {
         when(dbCon.prepareStatement(PGLockService.SQL_UNLOCK)).thenReturn(stmt);
 
         lockService.releaseLock();
-        // test_schema.databasechangeloglock
-        final long lockId = 0xF0B205EE_A6BFFB24L;
-        verify(stmt).setLong(1, lockId);
+        verifyLockParameters(stmt);
     }
 
     @Test
@@ -127,10 +125,51 @@ public class PGLockServiceTest {
     }
 
     @Test
-    public void noLockInfo() throws Exception {
+    @SuppressWarnings("resource")
+    public void usedLockInfo() throws Exception {
+        ResultSet infoResult = mock(ResultSet.class);
+        when(infoResult.next()).thenReturn(true).thenReturn(false);
+        when(infoResult.getInt("pid")).thenReturn(123);
+        when(infoResult.getString("client_hostname")).thenReturn("some-body.example.net");
+        when(infoResult.getTimestamp("backend_start")).thenReturn(new Timestamp(987654));
+        when(infoResult.getString("state")).thenReturn("testing");
+
+        PreparedStatement stmt = mock(PreparedStatement.class);
+        when(stmt.executeQuery()).thenReturn(infoResult);
+        when(dbCon.prepareStatement(PGLockService.SQL_LOCK_INFO)).thenReturn(stmt);
+
         DatabaseChangeLogLock[] lockList = lockService.listLocks();
+
+        assertEquals("Lock list length", 1, lockList.length);
+        assertNotNull("Null lock element", lockList[0]);
+        assertEquals("lockedBy", "some-body.example.net (testing)", lockList[0].getLockedBy());
+        verifyLockParameters(stmt);
+    }
+
+    @Test
+    @SuppressWarnings("resource")
+    public void noLockInfo() throws Exception {
+        PreparedStatement stmt = mock(PreparedStatement.class);
+        ResultSet infoResult = mock(ResultSet.class);
+        when(infoResult.next()).thenReturn(false);
+        when(stmt.executeQuery()).thenReturn(infoResult);
+        when(dbCon.prepareStatement(PGLockService.SQL_LOCK_INFO)).thenReturn(stmt);
+
+        DatabaseChangeLogLock[] lockList = lockService.listLocks();
+
         assertNotNull("Null array reference", lockList);
         assertEquals("Lock list length", 0, lockList.length);
+    }
+
+    @SuppressWarnings("resource")
+    private void verifyLockParameters(PreparedStatement stmt) throws SQLException {
+        // test_schema.databasechangeloglock
+        final int[] lockId = { 0xA6BFFB24, 0xF0B205EE };
+        verify(stmt).setInt(1, lockId[0]);
+        verify(stmt).setInt(2, lockId[1]);
+        verify(stmt).executeQuery();
+        verify(stmt).close();
+        verifyNoMoreInteractions(stmt);
     }
 
     // Single row / single column

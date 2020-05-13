@@ -8,6 +8,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 
 import liquibase.database.Database;
 import liquibase.database.core.PostgresDatabase;
@@ -36,8 +37,20 @@ import liquibase.lockservice.DatabaseChangeLogLock;
  */
 public class PGLockService extends SessionLockService {
 
-    static final String SQL_TRY_LOCK = "SELECT pg_try_advisory_lock(?)";
-    static final String SQL_UNLOCK = "SELECT pg_advisory_unlock(?)";
+    static final String SQL_TRY_LOCK = "SELECT pg_try_advisory_lock(?,?)";
+    static final String SQL_UNLOCK = "SELECT pg_advisory_unlock(?,?)";
+    static final String SQL_LOCK_INFO = "SELECT l.pid,"
+                                            + " a.client_hostname,"
+                                            + " a.backend_start,"
+                                            + " a.state"
+                                       + " FROM pg_locks l"
+                                       + " LEFT JOIN pg_stat_activity a"
+                                         + " ON a.pid = l.pid"
+                                      + " WHERE l.locktype = 'advisory'"
+                                        + " AND l.classid = ?"
+                                        + " AND l.objid = ?"
+                                        + " AND l.objsubid = 2"
+                                        + " AND l.granted";
 
     @Override
     public boolean supports(Database database) {
@@ -56,14 +69,11 @@ public class PGLockService extends SessionLockService {
         }
     }
 
-    private long getChangeLogLockId() {
+    private int[] getChangeLogLockId() {
         // Unlike the general Object.hashCode() contract,
         // String.hashCode() should be stable across VM instances and Java versions.
-        long high = database.getDefaultSchemaName().hashCode();
-        high <<= Integer.SIZE;
-        long low = database.getDatabaseChangeLogLockTableName().hashCode();
-        low &= 0x00000000_FFFFFFFFL;
-        return high | low;
+        return new int[] { database.getDatabaseChangeLogLockTableName().hashCode(),
+                           database.getDefaultSchemaName().hashCode() };
     }
 
     private static Boolean getBooleanResult(PreparedStatement stmt) throws SQLException {
@@ -80,7 +90,9 @@ public class PGLockService extends SessionLockService {
     @Override
     protected boolean acquireLock(Connection con) throws SQLException, LockException {
         try (PreparedStatement stmt = con.prepareStatement(SQL_TRY_LOCK)) {
-            stmt.setLong(1, getChangeLogLockId());
+            int[] lockId = getChangeLogLockId();
+            stmt.setInt(1, lockId[0]);
+            stmt.setInt(2, lockId[1]);
 
             return Boolean.TRUE.equals(getBooleanResult(stmt));
         }
@@ -93,7 +105,9 @@ public class PGLockService extends SessionLockService {
     @Override
     protected void releaseLock(Connection con) throws SQLException, LockException {
         try (PreparedStatement stmt = con.prepareStatement(SQL_UNLOCK)) {
-            stmt.setLong(1, getChangeLogLockId());
+            int[] lockId = getChangeLogLockId();
+            stmt.setInt(1, lockId[0]);
+            stmt.setInt(2, lockId[1]);
 
             Boolean unlocked = getBooleanResult(stmt);
             if (!Boolean.TRUE.equals(unlocked)) {
@@ -118,8 +132,29 @@ public class PGLockService extends SessionLockService {
     protected DatabaseChangeLogLock usedLock(Connection con)
             throws SQLException, LockException
     {
-        // TODO: Provide meaningful implementation.
-        return null;
+        try (PreparedStatement stmt = con.prepareStatement(SQL_LOCK_INFO)) {
+            int[] lockId = getChangeLogLockId();
+            stmt.setInt(1, lockId[0]);
+            stmt.setInt(2, lockId[1]);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (!rs.next()) {
+                    return null;
+                }
+
+                // This is not really the time the lock has been obtained...
+                Timestamp lockGranted = rs.getTimestamp("backend_start");
+                return new DatabaseChangeLogLock(1, lockGranted, lockedBy(rs));
+            }
+        }
+    }
+
+    private static String lockedBy(ResultSet rs) throws SQLException {
+        String host = rs.getString("client_hostname");
+        if (host == null) {
+            return "pid#" + rs.getInt("pid");
+        }
+        return host + " (" + rs.getString("state") + ")";
     }
 
 }
