@@ -22,7 +22,7 @@ import liquibase.logging.Logger;
  * <i>session-level</i> (vs.&#x20;<i>transaction-level</i>) locking.
  * Session-level locks get automatically released if the database connection
  * drops, and overcome the shortcoming of the
- * <a href="https://www.liquibase.org/documentation/databasechangeloglock_table.html">{@code StandardLockService}</a>:
+ * <a href="https://docs.liquibase.com/concepts/basic/databasechangeloglock-table.html">{@code StandardLockService}</a>:
  * <blockquote>
  * <p>If Liquibase does not exit cleanly, the lock row may be left as locked.
  * You can clear out the current lock by running <code>liquibase releaseLocks</code>
