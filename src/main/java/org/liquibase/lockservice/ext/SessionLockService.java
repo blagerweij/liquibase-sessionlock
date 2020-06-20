@@ -161,11 +161,7 @@ public abstract class SessionLockService extends StandardLockService {
         return null;
     }
 
-    /*
-     * XXX: Liquibase 4.0 breaks LogService API. Try making this backward-compatible.
-     */
     protected static Logger getLog(Class<?> clazz) {
-        //return LogService.getLog(clazz);
         return Scope.getCurrentScope().getLog(clazz);
     }
 
