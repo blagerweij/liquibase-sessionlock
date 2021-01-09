@@ -1,1 +1,17 @@
-/target/
+# generic
+build
+.DS_Store
+.gradle
+
+# eclipse
+.classpath
+.project
+.settings
+.metadata
+.externalToolBuilders
+*.launch
+
+# intellij
+.idea
+*.iml
+out
