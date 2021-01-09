@@ -43,18 +43,12 @@ dependencies {
     itestImplementation(
             platform('org.testcontainers:testcontainers-bom:1.15.1'),
             'mysql:mysql-connector-java:8.0.20',
-//            'org.assertj:assertj-core:3.18.1',
-//            'org.junit.jupiter:junit-jupiter-api:5.7.0',
             'org.liquibase:liquibase-core:3.8.9',
-//            'org.mockito:mockito-core:3.7.0',
             'org.postgresql:postgresql:42.2.14',
             'org.testcontainers:junit-jupiter',
             'org.testcontainers:mysql',
             'org.testcontainers:postgresql',
     )
-//    itestRuntimeOnly(
-//            'org.junit.jupiter:junit-jupiter-engine:5.7.0',
-//    )
 }
 
 java {

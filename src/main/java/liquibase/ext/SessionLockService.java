@@ -34,8 +34,8 @@ import liquibase.logging.Logger;
  * <p>Running <code>liquibase releaseLocks</code> in a micro-service production environment is not
  * really feasible.
  *
- * @implNote Subclasses need to override {@link #supports(Database)}. If {@code listLocks} necessary
- *     to provide actual info, {@link #usedLock(Connection)} has to be overridden, also.
+ * <p>Subclasses need to override {@link #supports(Database)}. If {@code listLocks} necessary to
+ * provide actual info, {@link #usedLock(Connection)} has to be overridden, also.
  */
 public abstract class SessionLockService extends StandardLockService {
 
