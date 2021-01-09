@@ -1,0 +1,14 @@
+package liquibase.ext;
+
+import org.testcontainers.containers.JdbcDatabaseContainer;
+import org.testcontainers.containers.MySQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+
+class MySQLLiquibaseUpdateTest extends AbstractLiquibaseUpdateTest {
+  @Container private static final MySQLContainer MY_SQL_CONTAINER = new MySQLContainer("mysql");
+
+  @Override
+  protected JdbcDatabaseContainer getDatabaseContainer() {
+    return MY_SQL_CONTAINER;
+  }
+}

@@ -1,0 +1,126 @@
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+    id 'signing'
+    id 'jacoco'
+    id 'checkstyle'
+    id 'com.softeq.gradle.itest' version '1.0.4'
+    id 'net.researchgate.release' version '2.8.1'
+    id 'org.sonarqube' version '2.8'
+}
+
+group = 'com.github.blagerweij'
+
+repositories {
+    mavenCentral()
+}
+
+configurations {
+    testImplementation.extendsFrom compileOnly
+    itestImplementation.extendsFrom testImplementation
+    itestRuntimeOnly.extendsFrom testRuntimeOnly
+}
+
+sourceSets {
+    itest {
+        compileClasspath += test.output
+        runtimeClasspath += test.output
+    }
+}
+
+dependencies {
+    compileOnly(
+        'org.liquibase:liquibase-core:3.8.9',
+    )
+    testImplementation(
+        'org.junit.jupiter:junit-jupiter-api:5.7.0',
+        'org.assertj:assertj-core:3.18.1',
+        'org.mockito:mockito-core:3.7.0',
+    )
+    testRuntimeOnly(
+        'org.junit.jupiter:junit-jupiter-engine:5.7.0',
+    )
+    itestImplementation(
+            platform('org.testcontainers:testcontainers-bom:1.15.1'),
+            'mysql:mysql-connector-java:8.0.20',
+            'org.liquibase:liquibase-core:3.8.9',
+            'org.postgresql:postgresql:42.2.14',
+            'org.testcontainers:junit-jupiter',
+            'org.testcontainers:mysql',
+            'org.testcontainers:postgresql',
+    )
+}
+
+java {
+    withSourcesJar()
+    withJavadocJar()
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+test {
+    useJUnitPlatform()
+}
+
+integrationTest {
+    useJUnitPlatform()
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.compilerArgs << '-parameters'
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            pom {
+                name = 'Liquibase SessionLock'
+                description = 'A concise description of my library'
+                url = 'https://github.com/blagerweij/liquibase-sessionlock'
+                licenses {
+                    license {
+                        name = 'The Apache License, Version 2.0'
+                        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'blagerweij'
+                        name = 'Barry Lagerweij'
+                        email = 'blagerweij@gmail.com'
+                    }
+                }
+                scm {
+                    connection = 'scm:git:git://github.com/blagerweij/liquibase-sessionlock.git'
+                    developerConnection = 'scm:git:ssh://github.com/blagerweij/liquibase-sessionlock.git'
+                    url = 'https://github.com/blagerweij/liquibase-sessionlock/'
+                }
+            }
+        }
+    }
+}
+
+signing {
+    sign configurations.archives
+}
+
+checkstyle {
+    toolVersion = '8.39'
+    config = project.resources.text.fromUri('https://raw.githubusercontent.com/checkstyle/checkstyle/master/src/main/resources/google_checks.xml')
+}
+
+tasks.sonarqube.dependsOn tasks.jacocoTestReport
+jacocoTestReport {
+    reports.xml.enabled true
+}
+
+release {
+    tagCommitMessage = 'Release tag [skip ci]'
+    newVersionCommitMessage = 'New version [skip ci]'
+    git {
+        requireBranch = ''
+    }
+}
+
+afterReleaseBuild.dependsOn publish
