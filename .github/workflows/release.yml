@@ -3,7 +3,7 @@ name: Release automatically on each push to master branch
 on:
   push:
     branches:
-    - $default-branch
+    - master
 
 jobs:
   build:
