@@ -1,6 +1,9 @@
-name: Java CI with Gradle
+name: Release automatically on each push to master branch
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+    - master
 
 jobs:
   build:
@@ -19,8 +22,4 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-gradle-
     - name: Build with Gradle
-      run: ./gradlew build
-    - uses: actions/upload-artifact@v2
-      with:
-        name: Package
-        path: build/libs
+      run: ./gradlew release

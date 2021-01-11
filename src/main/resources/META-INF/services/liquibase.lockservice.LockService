@@ -1,2 +1,2 @@
-liquibase.ext.MySQLLockService
-liquibase.ext.PGLockService
+com.github.blagerweij.sessionlock.MySQLLockService
+com.github.blagerweij.sessionlock.PGLockService

@@ -2,7 +2,7 @@
  * This module, both source code and documentation,
  * is in the Public Domain, and comes with NO WARRANTY.
  */
-package liquibase.ext;
+package com.github.blagerweij.sessionlock;
 
 import java.sql.Connection;
 import java.sql.SQLException;
