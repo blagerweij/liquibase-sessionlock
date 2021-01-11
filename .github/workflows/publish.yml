@@ -1,4 +1,4 @@
-name: Release automatically on each push to master branch
+name: Publish to Maven Central
 
 on:
   push:
