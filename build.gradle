@@ -99,6 +99,11 @@ uploadArchives {
                 }
                 developers {
                     developer {
+                        id = 'stanio'
+                        name = 'Stanimir Stamenkov'
+                        email = 'stanio@yahoo.com'
+                    }
+                    developer {
                         id = 'blagerweij'
                         name = 'Barry Lagerweij'
                         email = 'blagerweij@gmail.com'
