@@ -1,0 +1,30 @@
+name: Release automatically on each push to master branch
+
+on:
+  push:
+    tags:
+    - '*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-java@v1
+      with:
+        java-version: 11
+    - name: Cache Gradle packages
+      uses: actions/cache@v2
+      with:
+        path: ~/.gradle/caches
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
+        restore-keys: ${{ runner.os }}-gradle
+    - name: Build with Gradle
+      run: |
+        echo -n "${{ secrets.GPG_KEY_ARMOR }}" | gpg --quiet --output secring.gpg --dearmor -
+        ./gradlew uploadArchives \
+          -PsonatypeUsername=${{ secrets.SONATYPE_USERNAME }} \
+          -PsonatypePassword="${{ secrets.SONATYPE_PASSWORD }}" \
+          -Psigning.keyId=${{ secrets.GPG_KEY_ID }} \
+          -Psigning.password="${{ secrets.GPG_PASSWORD }}" \
+          -Psigning.secretKeyRingFile=secring.gpg

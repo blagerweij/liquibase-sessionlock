@@ -1,6 +1,6 @@
 plugins {
     id 'java-library'
-    id 'maven-publish'
+    id 'maven'
     id 'signing'
     id 'jacoco'
     id 'checkstyle'
@@ -30,15 +30,15 @@ sourceSets {
 
 dependencies {
     compileOnly(
-        'org.liquibase:liquibase-core:3.8.9',
+            'org.liquibase:liquibase-core:3.8.9',
     )
     testImplementation(
-        'org.junit.jupiter:junit-jupiter-api:5.7.0',
-        'org.assertj:assertj-core:3.18.1',
-        'org.mockito:mockito-core:3.7.0',
+            'org.junit.jupiter:junit-jupiter-api:5.7.0',
+            'org.assertj:assertj-core:3.18.1',
+            'org.mockito:mockito-core:3.7.0',
     )
     testRuntimeOnly(
-        'org.junit.jupiter:junit-jupiter-engine:5.7.0',
+            'org.junit.jupiter:junit-jupiter-engine:5.7.0',
     )
     itestImplementation(
             platform('org.testcontainers:testcontainers-bom:1.15.1'),
@@ -70,13 +70,26 @@ tasks.withType(JavaCompile).configureEach {
     options.compilerArgs << '-parameters'
 }
 
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            from components.java
-            pom {
+jar {
+    manifest {
+        attributes(
+                'Liquibase-Package': 'com.github.blagerweij.sessionlock',
+        )
+    }
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+                authentication(userName: ossrhUsername, password: ossrhPassword)
+            }
+
+            pom.project {
                 name = 'Liquibase SessionLock'
-                description = 'A concise description of my library'
+                description = 'Replaces the default DATABASECHANGELOGLOCK with a RDBMS lock, which is automatically released when the container is stopped unexpectedly'
                 url = 'https://github.com/blagerweij/liquibase-sessionlock'
                 licenses {
                     license {
@@ -93,8 +106,17 @@ publishing {
                 }
                 scm {
                     connection = 'scm:git:git://github.com/blagerweij/liquibase-sessionlock.git'
-                    developerConnection = 'scm:git:ssh://github.com/blagerweij/liquibase-sessionlock.git'
-                    url = 'https://github.com/blagerweij/liquibase-sessionlock/'
+                    developerConnection = 'scm:git:git@github.com:blagerweij/liquibase-sessionlock.git'
+                    url = 'https://github.com/blagerweij/liquibase-sessionlock'
+                }
+            }
+            repositories {
+                maven {
+                    url 'https://oss.sonatype.org/service/local/staging/deploy/maven2/'
+                    credentials {
+                        username = "${sonatypeUsername}"
+                        password = "${sonatypePassword}"
+                    }
                 }
             }
         }
@@ -115,6 +137,10 @@ jacocoTestReport {
     reports.xml.enabled true
 }
 
+artifacts {
+    archives javadocJar, sourcesJar
+}
+
 release {
     tagCommitMessage = 'Release tag [skip ci]'
     newVersionCommitMessage = 'New version [skip ci]'
@@ -123,4 +149,4 @@ release {
     }
 }
 
-afterReleaseBuild.dependsOn publish
+afterReleaseBuild.dependsOn uploadArchives
