@@ -3,13 +3,15 @@ name: Release automatically on each push to master branch
 on:
   push:
     branches:
-    - master
+    - $default-branch
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+      with:
+        token: ${{ secrets.RELEASE_TOKEN }}
     - uses: actions/setup-java@v1
       with:
         java-version: 11
