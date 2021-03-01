@@ -1,22 +1,22 @@
 package liquibase.ext;
 
-import com.github.blagerweij.sessionlock.MySQLLockService;
+import com.github.blagerweij.sessionlock.MariaDBLockService;
 import com.github.blagerweij.sessionlock.SessionLockService;
 
 import org.testcontainers.containers.JdbcDatabaseContainer;
-import org.testcontainers.containers.MySQLContainer;
+import org.testcontainers.containers.MariaDBContainer;
 import org.testcontainers.junit.jupiter.Container;
 
-class MySQLLiquibaseUpdateTest extends AbstractLiquibaseUpdateTest {
-  @Container private static final MySQLContainer MY_SQL_CONTAINER = new MySQLContainer("mysql");
+class MariaDBLiquibaseUpdateTest extends AbstractLiquibaseUpdateTest {
+  @Container private static final MariaDBContainer MARIA_DB_CONTAINER = new MariaDBContainer("mariadb");
 
   @Override
   protected Class<? extends SessionLockService> getExpectedLockServiceClass() {
-    return MySQLLockService.class;
+    return MariaDBLockService.class;
   }
 
   @Override
   protected JdbcDatabaseContainer getDatabaseContainer() {
-    return MY_SQL_CONTAINER;
+    return MARIA_DB_CONTAINER;
   }
 }

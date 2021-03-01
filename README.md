@@ -16,12 +16,32 @@ may not be really feasible.
 ## Supported Databases
 
 -   MySQL
+-   MariaDB
 -   PostgreSQL
+-   Oracle
 
-Support for other databases may be conveniently added by extending `SessionLockService`.  For Oracle one may look at:
+Support for other databases may be conveniently added by extending `SessionLockService`.
 
--   [DBMS_LOCK](https://docs.oracle.com/en/database/oracle/oracle-database/12.2/arpls/DBMS_LOCK.html) (Database PL/SQL Packages and Types Reference)
--   [Using Oracle Lock Management Services (User Locks)](https://www.oracle.com/pls/topic/lookup?ctx=en/database/oracle/oracle-database/12.2/arpls&id=ADFNS-GUID-57365E45-5F85-471B-81D9-F52EA16F1E85)
+### Oracle
+
+The Oracle implementation relies on [`DBMS_LOCK`](https://docs.oracle.com/en/database/oracle/oracle-database/19/arpls/DBMS_LOCK.html).
+The user that executes liquibase must have `EXECUTE` privilege on `DBMS_LOCK`.
+
+```sql
+grant execute on SYS.DBMS_LOCK to <user>;  
+```
+
+Oracle does not provide a way to retrieve lock details (e.g. who owns a lock) without elevated privileges.
+You can use the following query to get lock details:
+
+```sql
+select locks_allocated.*, locks.*
+from dba_locks locks, sys.dbms_lock_allocated locks_allocated
+where locks.lock_id1 = locks_allocated.lockid
+and locks_allocated.name = 'lockname';
+```
+
+However, it's possible to get some information about the current session from `SYS_CONTEXT`, so that's what gets returned by the `DatabaseChangeLogLock` object.
 
 ## Usage
 To use the new lockservice, simply add a dependency to the library. Because the priority is higher
@@ -32,11 +52,11 @@ than the StandardLockService, it will automatically be used (provided the databa
 <dependency>
     <groupId>com.github.blagerweij</groupId>
     <artifactId>liquibase-sessionlock</artifactId>
-    <version>1.2.5</version>
+    <version>1.4.0</version>
 </dependency>
 ```
 ### Gradle
-`implementation 'com.github.blagerweij:liquibase-sessionlock:1.2.5'`
+`implementation 'com.github.blagerweij:liquibase-sessionlock:1.4.0'`
 
 ## Disclaimer
 

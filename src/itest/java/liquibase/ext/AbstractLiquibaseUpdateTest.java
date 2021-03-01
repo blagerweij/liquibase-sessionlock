@@ -2,6 +2,8 @@ package liquibase.ext;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.github.blagerweij.sessionlock.SessionLockService;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.util.ArrayList;
@@ -19,16 +21,18 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 @Testcontainers
 abstract class AbstractLiquibaseUpdateTest {
-  private List<Throwable> exceptions = new ArrayList<>();
+  private final List<Throwable> exceptions = new ArrayList<>();
 
   @Test
   void concurrentUpdate() throws Exception {
-    Thread updateThread = startLiquibaseThread("update", new Updatetask());
-    Thread noopThread = startLiquibaseThread("noop", new NoopTask());
+    Thread updateThread = startLiquibaseThread("update", new UpdateTask());
+    Thread noopThread = startLiquibaseThread("noop", new NoopTask(getExpectedLockServiceClass()));
     updateThread.join();
     noopThread.join();
     assertThat(exceptions).isEmpty();
   }
+
+  protected abstract Class<? extends SessionLockService> getExpectedLockServiceClass();
 
   private Thread startLiquibaseThread(String name, LiquibaseConsumer task) {
     Thread th = new Thread(() -> withLiquibase(task), name);
@@ -47,7 +51,7 @@ abstract class AbstractLiquibaseUpdateTest {
               new JdbcConnection(connection));
       task.accept(liquibase);
       liquibase.getDatabase().close();
-    } catch (Exception e) {
+    } catch (AssertionError | Exception e) {
       exceptions.add(e);
     }
   }
@@ -60,21 +64,31 @@ abstract class AbstractLiquibaseUpdateTest {
   }
 
   static class NoopTask implements LiquibaseConsumer {
-    @Override
+
+    private Class<? extends SessionLockService> expectedLockServiceClass;
+
+    public NoopTask(Class<? extends SessionLockService> expectedLockServiceClass) {
+      this.expectedLockServiceClass = expectedLockServiceClass;
+    }
+
+     @Override
     public void accept(Liquibase liquibase) throws LiquibaseException, InterruptedException {
       Thread.sleep(1000L); // first wait 1 sec, so update thread runs first
       LockService lockService =
           LockServiceFactory.getInstance().getLockService(liquibase.getDatabase());
       lockService.waitForLock();
       try {
+        assertThat(lockService).isInstanceOf(expectedLockServiceClass);
         assertThat(liquibase.getDatabase().getRanChangeSetList()).isNotEmpty();
+        assertThat(lockService.listLocks()).hasSize(1);
       } finally {
         lockService.releaseLock();
       }
     }
+
   }
 
-  static class Updatetask implements LiquibaseConsumer {
+  static class UpdateTask implements LiquibaseConsumer {
     @Override
     public void accept(Liquibase liquibase) throws LiquibaseException {
       liquibase.update(new Contexts());
