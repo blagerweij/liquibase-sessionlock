@@ -1,14 +1,13 @@
-package liquibase.ext;
-
-import com.github.blagerweij.sessionlock.OracleLockService;
-import com.github.blagerweij.sessionlock.SessionLockService;
+package com.github.blagerweij.sessionlock;
 
 import org.testcontainers.containers.JdbcDatabaseContainer;
 import org.testcontainers.containers.OracleContainer;
 import org.testcontainers.junit.jupiter.Container;
 
 class OracleXELiquibaseUpdateTest extends AbstractLiquibaseUpdateTest {
-  @Container private static final OracleContainer ORACLE_DB_CONTAINER = new OracleContainer("oracleinanutshell/oracle-xe-11g");
+  @Container
+  private static final OracleContainer ORACLE_DB_CONTAINER =
+      new OracleContainer("oracleinanutshell/oracle-xe-11g");
 
   @Override
   protected Class<? extends SessionLockService> getExpectedLockServiceClass() {

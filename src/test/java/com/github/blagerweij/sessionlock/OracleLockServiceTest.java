@@ -18,13 +18,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.Date;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.InOrder;
-
 import liquibase.database.core.MariaDBDatabase;
 import liquibase.database.core.MySQLDatabase;
 import liquibase.database.core.OracleDatabase;
@@ -32,6 +28,9 @@ import liquibase.database.core.PostgresDatabase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.LockException;
 import liquibase.lockservice.DatabaseChangeLogLock;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.InOrder;
 
 public class OracleLockServiceTest {
 
@@ -78,9 +77,9 @@ public class OracleLockServiceTest {
     assertThat(lockService.acquireLock()).isTrue();
     InOrder inOrder = inOrder(stmt);
     inOrder.verify(stmt).registerOutParameter(1, Types.INTEGER);
-    inOrder.verify(stmt).setString(2,LOCK_ID);
-    inOrder.verify(stmt).setInt(3,6);
-    inOrder.verify(stmt).setInt(4,5);
+    inOrder.verify(stmt).setString(2, LOCK_ID);
+    inOrder.verify(stmt).setInt(3, 6);
+    inOrder.verify(stmt).setInt(4, 5);
     inOrder.verify(stmt).executeQuery();
     inOrder.verify(stmt).getInt(1);
     inOrder.verify(stmt).close();
@@ -116,13 +115,13 @@ public class OracleLockServiceTest {
     mockAllocateLock(dbCon);
 
     CallableStatement stmt = mock(CallableStatement.class);
-    when(stmt.getInt(1)).thenReturn(1);
+    when(stmt.getInt(1)).thenReturn(0);
     when(dbCon.prepareCall(OracleLockService.SQL_RELEASE_LOCK)).thenReturn(stmt);
 
     lockService.releaseLock();
     InOrder inOrder = inOrder(stmt);
     inOrder.verify(stmt).registerOutParameter(1, Types.INTEGER);
-    inOrder.verify(stmt).setString(2,LOCK_ID);
+    inOrder.verify(stmt).setString(2, LOCK_ID);
     inOrder.verify(stmt).executeQuery();
     inOrder.verify(stmt).getInt(1);
     inOrder.verify(stmt).close();
@@ -147,28 +146,28 @@ public class OracleLockServiceTest {
 
     ResultSet infoResult = mock(ResultSet.class);
     when(infoResult.next()).thenReturn(true).thenReturn(false);
-    when(infoResult.getString("SESSIONID")).thenReturn("sessionId");
-    when(infoResult.getString("CURRENT_USER")).thenReturn("currentUser");
-    when(infoResult.getString("CURRENT_SCHEMA")).thenReturn("currentSchema");
-    when(infoResult.getString("INSTANCE_NAME")).thenReturn("instanceName");
-    when(infoResult.getString("HOST")).thenReturn("host");
-    when(infoResult.getString("OS_USER")).thenReturn("osUser");
+    when(infoResult.getInt(1)).thenReturn(123);
+    when(infoResult.getTimestamp(2)).thenReturn(new Timestamp(new Date().getTime()));
+    when(infoResult.getString(3)).thenReturn("dbuser");
+    when(infoResult.getString(4)).thenReturn("osuser");
+    when(infoResult.getString(5)).thenReturn("host");
 
     PreparedStatement stmt = mock(PreparedStatement.class);
     when(stmt.executeQuery()).thenReturn(infoResult);
     when(dbCon.prepareStatement(OracleLockService.SQL_LOCK_INFO)).thenReturn(stmt);
 
     DatabaseChangeLogLock[] lockList = lockService.listLocks();
+    verify(stmt).setInt(1, 1073741824);
     verify(stmt).executeQuery();
     verify(stmt).close();
     assertThat(lockList).hasSize(1);
     assertThat(lockList[0]).isNotNull();
     assertThat(lockList[0].getId()).isEqualTo(Integer.parseInt(LOCK_ID));
     assertThat(lockList[0].getLockGranted()).isInSameDayAs(new Date());
-    assertThat(lockList[0].getLockedBy()).isEqualTo("(session_id=sessionId)(current_user=currentUser)(instance_name=instanceName)(os_user=osUser)(host=host)");
+    assertThat(lockList[0].getLockedBy())
+        .isEqualTo("(session_id=123)(current_user=dbuser)(os_user=osuser)(host=host)");
     verifyLockParameters(stmt);
   }
-
 
   private void verifyLockParameters(PreparedStatement stmt) throws SQLException {
     verify(stmt).executeQuery();
@@ -196,5 +195,4 @@ public class OracleLockServiceTest {
     when(stmtAllocate.getString(2)).thenReturn(LOCK_ID);
     when(c.prepareCall(OracleLockService.SQL_ALLOCATE_LOCK)).thenReturn(stmtAllocate);
   }
-
 }

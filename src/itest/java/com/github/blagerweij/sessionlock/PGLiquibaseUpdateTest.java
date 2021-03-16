@@ -1,7 +1,4 @@
-package liquibase.ext;
-
-import com.github.blagerweij.sessionlock.PGLockService;
-import com.github.blagerweij.sessionlock.SessionLockService;
+package com.github.blagerweij.sessionlock;
 
 import org.testcontainers.containers.JdbcDatabaseContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
@@ -9,7 +6,8 @@ import org.testcontainers.junit.jupiter.Container;
 
 class PGLiquibaseUpdateTest extends AbstractLiquibaseUpdateTest {
   @Container
-  private static final PostgreSQLContainer POSTGRES_SQL_CONTAINER = new PostgreSQLContainer("postgres");
+  private static final PostgreSQLContainer POSTGRES_SQL_CONTAINER =
+      new PostgreSQLContainer("postgres");
 
   @Override
   protected Class<? extends SessionLockService> getExpectedLockServiceClass() {

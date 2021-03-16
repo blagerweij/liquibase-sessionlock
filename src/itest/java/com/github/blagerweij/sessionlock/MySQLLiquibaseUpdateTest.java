@@ -1,7 +1,4 @@
-package liquibase.ext;
-
-import com.github.blagerweij.sessionlock.MySQLLockService;
-import com.github.blagerweij.sessionlock.SessionLockService;
+package com.github.blagerweij.sessionlock;
 
 import org.testcontainers.containers.JdbcDatabaseContainer;
 import org.testcontainers.containers.MySQLContainer;

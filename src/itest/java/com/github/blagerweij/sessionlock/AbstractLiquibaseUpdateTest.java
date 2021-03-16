@@ -1,8 +1,6 @@
-package liquibase.ext;
+package com.github.blagerweij.sessionlock;
 
 import static org.assertj.core.api.Assertions.assertThat;
-
-import com.github.blagerweij.sessionlock.SessionLockService;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -24,12 +22,14 @@ abstract class AbstractLiquibaseUpdateTest {
   private final List<Throwable> exceptions = new ArrayList<>();
 
   @Test
-  void concurrentUpdate() throws Exception {
+  void concurrentUpdate() throws Throwable {
     Thread updateThread = startLiquibaseThread("update", new UpdateTask());
     Thread noopThread = startLiquibaseThread("noop", new NoopTask(getExpectedLockServiceClass()));
     updateThread.join();
     noopThread.join();
-    assertThat(exceptions).isEmpty();
+    if (!exceptions.isEmpty()) {
+      throw exceptions.get(0);
+    }
   }
 
   protected abstract Class<? extends SessionLockService> getExpectedLockServiceClass();
@@ -71,7 +71,7 @@ abstract class AbstractLiquibaseUpdateTest {
       this.expectedLockServiceClass = expectedLockServiceClass;
     }
 
-     @Override
+    @Override
     public void accept(Liquibase liquibase) throws LiquibaseException, InterruptedException {
       Thread.sleep(1000L); // first wait 1 sec, so update thread runs first
       LockService lockService =
@@ -85,7 +85,6 @@ abstract class AbstractLiquibaseUpdateTest {
         lockService.releaseLock();
       }
     }
-
   }
 
   static class UpdateTask implements LiquibaseConsumer {

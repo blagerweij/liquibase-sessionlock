@@ -139,8 +139,8 @@ signing {
 }
 
 checkstyle {
-    toolVersion = '8.39'
-    config = project.resources.text.fromUri('https://raw.githubusercontent.com/checkstyle/checkstyle/master/src/main/resources/google_checks.xml')
+    toolVersion = '8.41'
+    config = project.resources.text.fromUri('https://raw.githubusercontent.com/checkstyle/checkstyle/checkstyle-8.41/src/main/resources/google_checks.xml')
 }
 
 tasks.sonarqube.dependsOn tasks.jacocoTestReport
