@@ -6,7 +6,8 @@ import org.testcontainers.junit.jupiter.Container;
 
 class OracleXELiquibaseUpdateTest extends AbstractLiquibaseUpdateTest {
   public OracleXELiquibaseUpdateTest() {
-    // Somehow Timezone UTC is not recognized in Github Actions
+    // Workaround for Timezone problem (see
+    // https://github.com/testcontainers/testcontainers-java/issues/2313)
     System.setProperty("oracle.jdbc.timezoneAsRegion", "false");
   }
 
