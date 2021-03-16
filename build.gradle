@@ -31,7 +31,7 @@ sourceSets {
 
 dependencies {
     compileOnly(
-            'org.liquibase:liquibase-core:3.8.9',
+            'org.liquibase:liquibase-core:4.3.1',
     )
     testImplementation(
             'org.junit.jupiter:junit-jupiter-api:5.7.0',
@@ -42,13 +42,17 @@ dependencies {
             'org.junit.jupiter:junit-jupiter-engine:5.7.0',
     )
     itestImplementation(
-            platform('org.testcontainers:testcontainers-bom:1.15.1'),
+            platform('org.testcontainers:testcontainers-bom:1.15.2'),
             'mysql:mysql-connector-java:8.0.20',
-            'org.liquibase:liquibase-core:3.8.9',
+            'org.liquibase:liquibase-core:4.3.1',
             'org.postgresql:postgresql:42.2.14',
+            'org.mariadb.jdbc:mariadb-java-client:2.7.2',
+            'com.oracle.database.jdbc:ojdbc8:21.1.0.0',
             'org.testcontainers:junit-jupiter',
             'org.testcontainers:mysql',
             'org.testcontainers:postgresql',
+            'org.testcontainers:mariadb',
+            'org.testcontainers:oracle-xe',
     )
 }
 
@@ -135,8 +139,8 @@ signing {
 }
 
 checkstyle {
-    toolVersion = '8.39'
-    config = project.resources.text.fromUri('https://raw.githubusercontent.com/checkstyle/checkstyle/master/src/main/resources/google_checks.xml')
+    toolVersion = '8.41'
+    config = project.resources.text.fromUri('https://raw.githubusercontent.com/checkstyle/checkstyle/checkstyle-8.41/src/main/resources/google_checks.xml')
 }
 
 tasks.sonarqube.dependsOn tasks.jacocoTestReport
