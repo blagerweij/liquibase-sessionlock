@@ -52,6 +52,8 @@ abstract class AbstractLiquibaseUpdateTest {
       task.accept(liquibase);
       liquibase.getDatabase().close();
     } catch (AssertionError | Exception e) {
+      e.fillInStackTrace();
+      e.printStackTrace();
       exceptions.add(e);
     }
   }
