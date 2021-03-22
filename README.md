@@ -49,11 +49,11 @@ than the StandardLockService, it will automatically be used (provided the databa
 <dependency>
     <groupId>com.github.blagerweij</groupId>
     <artifactId>liquibase-sessionlock</artifactId>
-    <version>1.4.0</version>
+    <version>1.4.1</version>
 </dependency>
 ```
 ### Gradle
-`implementation 'com.github.blagerweij:liquibase-sessionlock:1.4.0'`
+`implementation 'com.github.blagerweij:liquibase-sessionlock:1.4.1'`
 
 ## Disclaimer
 
