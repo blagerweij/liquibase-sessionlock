@@ -34,11 +34,15 @@ The Postgres implementation used `pg_try_advisory_lock` and `pg_try_advisory_unl
 
 The Oracle implementation relies on [`DBMS_LOCK`](https://docs.oracle.com/en/database/oracle/oracle-database/19/arpls/DBMS_LOCK.html).
 The user that executes liquibase must have `EXECUTE` privilege on `DBMS_LOCK`.
-
 ```sql
 grant execute on SYS.DBMS_LOCK to <user>;
 ```
-To read lock information, the user needs permissions to read from `V$LOCKS` and `V$SESSION`.
+
+To read lock information, the user needs permissions to read from `V$LOCK` and `V$SESSION`.
+```sql
+grant select on SYS.V_$LOCK to <user>;
+grant select on SYS.V_$SESSION to <user>;
+```
 
 ## Usage
 To use the new lockservice, simply add a dependency to the library. Because the priority is higher
