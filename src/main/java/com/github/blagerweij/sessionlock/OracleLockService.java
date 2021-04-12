@@ -141,9 +141,6 @@ public class OracleLockService extends SessionLockService {
    * </code></pre>
    *
    * @see "<a
-   *     href='https://docs.oracle.com/en/database/oracle/oracle-database/19/sqlrf/SYS_CONTEXT.html'>
-   *     <code>SYS_CONTEXT</code></a> (Oracle PL/SQL Reference Manual)"
-   * @see "<a
    *     href='https://docs.oracle.com/en/database/oracle/oracle-database/19/refrn/DBMS_LOCK_ALLOCATED.html'>The
    *     DBMS_LOCK_ALLOCATED Table</a> (Oracle PL/SQL Reference Manual)"
    * @see "<a
