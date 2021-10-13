@@ -68,12 +68,16 @@ public class PGLockService extends SessionLockService {
     }
   }
 
-  private int[] getChangeLogLockId() {
+  private int[] getChangeLogLockId() throws LockException {
+    String defaultSchemaName = database.getDefaultSchemaName();
+    if (defaultSchemaName == null) {
+      throw new LockException("Default schema name is not set for current DB user/connection");
+    }
     // Unlike the general Object.hashCode() contract,
     // String.hashCode() should be stable across VM instances and Java versions.
     return new int[] {
       database.getDatabaseChangeLogLockTableName().hashCode(),
-      database.getDefaultSchemaName().hashCode()
+      defaultSchemaName.hashCode()
     };
   }
 
