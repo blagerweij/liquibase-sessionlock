@@ -45,8 +45,10 @@ grant select on SYS.V_$SESSION to <user>;
 ```
 
 ## Usage
-To use the new lockservice, simply add a dependency to the library. Because the priority is higher
-than the StandardLockService, it will automatically be used (provided the database is supported). The library supports Liquibase v3.x and v4.x.
+To use the new lockservice, simply add a dependency to the library. 
+In Liquibase v4.x, because the priority is higher than the StandardLockService, it will automatically be used (provided the database is supported).
+
+In Liquibase v3.7.x and above, especially when used standalone or integrated with Dropwizard framework, `com.github.blagerweij.sessionlock` string needs to be added to Liquibase classpath scanner's whitelist of packages to scan, by either system property `liquibase.scan.packages` or `Liquibase-Package` entry in MANIFEST.mf, as described [here](https://github.com/liquibase/liquibase/blob/46fc9ce9ba08806d9ad943983cc99f4f9160aeb7/liquibase-core/src/main/java/liquibase/servicelocator/ServiceLocator.java#L106) 
 
 ### Maven
 ```xml
