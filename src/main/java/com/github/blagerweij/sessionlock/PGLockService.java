@@ -55,7 +55,7 @@ public class PGLockService extends SessionLockService {
 
   @Override
   public boolean supports(Database database) {
-    return (database instanceof PostgresDatabase) && isAtLeastPostgres91(database);
+    return (database instanceof PostgresDatabase) && isAtLeastPostgres91(database) && !isSessionLockingDisabled();
   }
 
   private static boolean isAtLeastPostgres91(Database database) {

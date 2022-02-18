@@ -52,6 +52,12 @@ public abstract class SessionLockService extends StandardLockService {
     return false;
   }
 
+  public boolean isSessionLockingDisabled() {
+	  boolean sessionLockingDisabled = Boolean.parseBoolean(System.getProperty("liquibase.sessionlock.disable"));
+	  if (sessionLockingDisabled) getLog(getClass()).info("Session locking has been explicitly disabled with liquibase.sessionlock.disable");
+	  return sessionLockingDisabled;
+  }
+  
   /**
    * This implementation is a <i>no-op</i>. Suppresses creating the {@code DATABASECHANGELOGLOCK}
    * table by the {@code StandardLockService} implementation.

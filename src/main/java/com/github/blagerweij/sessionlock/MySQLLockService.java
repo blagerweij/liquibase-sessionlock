@@ -44,7 +44,7 @@ public class MySQLLockService extends SessionLockService {
 
   @Override
   public boolean supports(Database database) {
-    return (database instanceof MySQLDatabase);
+    return (database instanceof MySQLDatabase) && !isSessionLockingDisabled();
   }
 
   private String getChangeLogLockName() {

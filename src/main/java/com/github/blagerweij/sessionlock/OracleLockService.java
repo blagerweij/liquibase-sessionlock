@@ -11,8 +11,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Locale;
+import java.util.UUID;
 import liquibase.database.Database;
 import liquibase.database.core.OracleDatabase;
+import liquibase.database.jvm.JdbcConnection;
+import liquibase.exception.DatabaseException;
 import liquibase.exception.LockException;
 import liquibase.lockservice.DatabaseChangeLogLock;
 
@@ -35,9 +38,37 @@ public class OracleLockService extends SessionLockService {
           + " s.MACHINE from v$lock l join v$session s on l.sid = s.SID where l.type = 'UL'   and"
           + " l.id1 = ?";
 
+  private static Database lastSuccessfulTest = null;
+  
   @Override
-  public boolean supports(Database database) {
-    return (database instanceof OracleDatabase);
+  public boolean supports(Database database)  {
+	if (database instanceof OracleDatabase && !isSessionLockingDisabled()) {
+		if (database==lastSuccessfulTest) {
+			getLog(getClass()).info("Database capabilities already successfully tested");
+			return true;
+		}
+		getLog(getClass()).info("Testing Oracle capabilities");
+		JdbcConnection conn = (JdbcConnection) database.getConnection();
+		if (conn==null) return false;
+		try {
+		  try (PreparedStatement stmt = conn.prepareStatement(SQL_LOCK_INFO)) {
+	          stmt.setInt(1, -1);
+	          stmt.executeQuery();
+	      } 
+		  try (CallableStatement stmt = conn.prepareCall(SQL_RELEASE_LOCK)) {
+		      stmt.registerOutParameter(1, Types.INTEGER);
+		      stmt.setString(2, UUID.randomUUID().toString());
+		      stmt.executeQuery();
+		  }
+		} catch (DatabaseException | SQLException e) {
+			getLog(getClass()).warning("Error during capability test for oracle session locking: " + e);
+			getLog(getClass()).warning("Oracle user needs execute access on DBMS_LOCK, and select access on SYS.V_$LOCK and SYS.V_$SESSION to use session locking");
+			return false;
+		}
+		lastSuccessfulTest = database;
+		return true;
+	}
+	return false;
   }
 
   private String getChangeLogLockName() {
@@ -56,7 +87,7 @@ public class OracleLockService extends SessionLockService {
       stmt.setString(1, getChangeLogLockName());
       stmt.registerOutParameter(2, Types.VARCHAR);
       stmt.executeQuery();
-
+      
       return stmt.getString(2);
     }
   }
