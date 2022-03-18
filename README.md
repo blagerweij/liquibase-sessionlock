@@ -44,6 +44,10 @@ grant select on SYS.V_$LOCK to <user>;
 grant select on SYS.V_$SESSION to <user>;
 ```
 
+### MSSQL
+
+The MSSQL implementation used application resources locks with `sp_getapplock` and `sp_releaseapplock`
+
 ## Usage
 To use the new lockservice, simply add a dependency to the library. 
 In Liquibase v4.x, because the priority is higher than the StandardLockService, it will automatically be used (provided the database is supported).
@@ -55,11 +59,11 @@ In Liquibase v3.7.x and above, especially when used standalone or integrated wit
 <dependency>
     <groupId>com.github.blagerweij</groupId>
     <artifactId>liquibase-sessionlock</artifactId>
-    <version>1.4.0</version>
+    <version>1.5.1</version>
 </dependency>
 ```
 ### Gradle
-`implementation 'com.github.blagerweij:liquibase-sessionlock:1.4.0'`
+`implementation 'com.github.blagerweij:liquibase-sessionlock:1.5.1'`
 
 ## Disclaimer
 
