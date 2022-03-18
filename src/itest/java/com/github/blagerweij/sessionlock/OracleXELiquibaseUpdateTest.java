@@ -12,8 +12,7 @@ class OracleXELiquibaseUpdateTest extends AbstractLiquibaseUpdateTest {
   }
 
   @Container
-  private static final OracleContainer ORACLE_DB_CONTAINER =
-      new OracleContainer("oracleinanutshell/oracle-xe-11g");
+  private static final OracleContainer ORACLE_DB_CONTAINER = new OracleContainer("gvenzl/oracle-xe:11").usingSid();
 
   @Override
   protected Class<? extends SessionLockService> getExpectedLockServiceClass() {
