@@ -1,3 +1,4 @@
+com.github.blagerweij.sessionlock.MSSQLLockService
 com.github.blagerweij.sessionlock.MySQLLockService
 com.github.blagerweij.sessionlock.OracleLockService
 com.github.blagerweij.sessionlock.PGLockService
