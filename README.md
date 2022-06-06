@@ -38,10 +38,10 @@ The user that executes liquibase must have `EXECUTE` privilege on `DBMS_LOCK`.
 grant execute on SYS.DBMS_LOCK to <user>;
 ```
 
-To read lock information, the user needs permissions to read from `V$LOCK` and `V$SESSION`.
+To read lock information, the user needs permissions to read from `GV$LOCK` and `GV$SESSION`.
 ```sql
-grant select on SYS.V_$LOCK to <user>;
-grant select on SYS.V_$SESSION to <user>;
+grant select on SYS.GV_$LOCK to <user>;
+grant select on SYS.GV_$SESSION to <user>;
 ```
 
 ### MSSQL
