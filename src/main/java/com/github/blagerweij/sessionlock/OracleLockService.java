@@ -41,7 +41,7 @@ public class OracleLockService extends SessionLockService {
   }
 
   private String getChangeLogLockName() {
-    return (database.getDefaultSchemaName() + "." + database.getDatabaseChangeLogLockTableName())
+    return (database.getLiquibaseSchemaName() + "." + database.getDatabaseChangeLogLockTableName())
         .toUpperCase(Locale.ROOT);
   }
 
