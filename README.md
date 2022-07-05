@@ -4,7 +4,7 @@ Provides _session-level_ (vs. _transaction-level_)
 [`LockService`](http://www.liquibase.org/javadoc/liquibase/lockservice/LockService.html)
 implementations.  Session-level locks get automatically released if the database
 connection drops, and overcome the shortcoming of the
-[`StandardLockService`](https://docs.liquibase.com/concepts/basic/databasechangeloglock-table.html):
+[`StandardLockService`](https://docs.liquibase.com/concepts/tracking-tables/databasechangeloglock-table.html):
 
 >   If Liquibase does not exit cleanly, the lock row may be left as locked.
 >   You can clear out the current lock by running `liquibase releaseLocks`
