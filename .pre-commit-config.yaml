@@ -14,6 +14,6 @@ repos:
   rev: v1.6.1
   hooks:
   - id: pretty-format-java
-    args: [--autofix]
+    args: [--autofix, --google-java-formatter-version=1.7]
   - id: pretty-format-yaml
     args: [--autofix, --indent, '2']
