@@ -31,7 +31,7 @@ sourceSets {
 
 dependencies {
     compileOnly(
-            'org.liquibase:liquibase-core:4.9.0',
+            "org.liquibase:liquibase-core:${liquibaseVersion}",
     )
     testImplementation(
             'org.junit.jupiter:junit-jupiter-api:5.7.0',
@@ -44,11 +44,11 @@ dependencies {
     itestImplementation(
             platform('org.testcontainers:testcontainers-bom:1.16.3'),
             'mysql:mysql-connector-java:8.0.20',
-            'org.liquibase:liquibase-core:4.9.0',
+            "org.liquibase:liquibase-core:${liquibaseVersion}",
             'org.postgresql:postgresql:42.2.14',
             'org.mariadb.jdbc:mariadb-java-client:2.7.2',
             'com.oracle.database.jdbc:ojdbc8:21.1.0.0',
-            'com.microsoft.sqlserver:mssql-jdbc:9.4.1.jre11',
+            'com.microsoft.sqlserver:mssql-jdbc:9.4.1.jre8',
             'org.testcontainers:junit-jupiter',
             'org.testcontainers:mysql',
             'org.testcontainers:postgresql',
