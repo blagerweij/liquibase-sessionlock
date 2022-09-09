@@ -10,7 +10,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.DateFormat;
 import java.util.Date;
-import liquibase.Scope;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.jvm.JdbcConnection;
@@ -77,7 +76,7 @@ public abstract class SessionLockService implements LockService {
     while (!locked && (new Date().getTime() < timeToGiveUp)) {
       locked = acquireLock();
       if (!locked) {
-        Scope.getCurrentScope().getLog(getClass()).info("Waiting for changelog lock....");
+        getLog(getClass()).info("Waiting for changelog lock....");
         try {
           Thread.sleep(changeLogLockRecheckTime * 1000);
         } catch (InterruptedException e) {
