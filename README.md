@@ -4,7 +4,7 @@ Provides _session-level_ (vs. _transaction-level_)
 [`LockService`](http://www.liquibase.org/javadoc/liquibase/lockservice/LockService.html)
 implementations.  Session-level locks get automatically released if the database
 connection drops, and overcome the shortcoming of the
-[`StandardLockService`](https://docs.liquibase.com/concepts/basic/databasechangeloglock-table.html):
+[`StandardLockService`](https://docs.liquibase.com/concepts/tracking-tables/databasechangeloglock-table.html):
 
 >   If Liquibase does not exit cleanly, the lock row may be left as locked.
 >   You can clear out the current lock by running `liquibase releaseLocks`
@@ -38,10 +38,10 @@ The user that executes liquibase must have `EXECUTE` privilege on `DBMS_LOCK`.
 grant execute on SYS.DBMS_LOCK to <user>;
 ```
 
-To read lock information, the user needs permissions to read from `V$LOCK` and `V$SESSION`.
+To read lock information, the user needs permissions to read from `GV$LOCK` and `GV$SESSION`.
 ```sql
-grant select on SYS.V_$LOCK to <user>;
-grant select on SYS.V_$SESSION to <user>;
+grant select on SYS.GV_$LOCK to <user>;
+grant select on SYS.GV_$SESSION to <user>;
 ```
 
 ### MSSQL
