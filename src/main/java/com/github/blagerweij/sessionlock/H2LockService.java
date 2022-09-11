@@ -10,6 +10,7 @@ import liquibase.exception.LockException;
 import liquibase.lockservice.DatabaseChangeLogLock;
 
 import java.sql.*;
+import java.util.Date;
 
 /**
  * Employs PostgreSQL <i>advisory locks</i>.
@@ -86,7 +87,7 @@ public class H2LockService extends SessionLockService {
 
       Boolean unlocked = stmt.executeUpdate() == 0;
       if (!Boolean.TRUE.equals(unlocked)) {
-        throw new LockException("pg_advisory_unlock() returned " + unlocked);
+        throw new LockException(SQL_UNLOCK + " returned " + unlocked);
       }
     }
   }
@@ -94,22 +95,11 @@ public class H2LockService extends SessionLockService {
   /**
    * Obtains information about the database changelog lock.
    *
-   * <blockquote>
-   *
-   * Like all locks in PostgreSQL, a complete list of advisory locks currently held by any session
-   * can be found in the <code>pg_locks</code> system view.
-   *
-   * </blockquote>
-   *
-   * @see "<a href='https://www.postgresql.org/docs/9.6/view-pg-locks.html'><code>pg_locks</code>
-   *     </a> (PostgreSQL Documentation)"
-   * @see "<a
-   *     href='https://www.postgresql.org/docs/9.6/monitoring-stats.html#PG-STAT-ACTIVITY-VIEW'>
-   *     <code>pg_stat_activity</code> View</a> (PostgreSQL Documentation)"
    */
   @Override
   protected DatabaseChangeLogLock usedLock(Connection con) throws SQLException, LockException {
-    throw new RuntimeException("Unsupported");
+    // Sadly there is no way to determine the actual Lockdata from the connection
+    return new DatabaseChangeLogLock(1,new Date(),"liquibase");
   }
 
   private static String lockedBy(ResultSet rs) throws SQLException {
