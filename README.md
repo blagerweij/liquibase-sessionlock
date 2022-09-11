@@ -17,8 +17,10 @@ may not be really feasible.
 
 -   MySQL
 -   MariaDB
+-   MSSQL
 -   PostgreSQL
 -   Oracle
+-   H2
 
 Support for other databases may be conveniently added by extending `SessionLockService`.
 
@@ -47,6 +49,10 @@ grant select on SYS.GV_$SESSION to <user>;
 ### MSSQL
 
 The MSSQL implementation used application resources locks with `sp_getapplock` and `sp_releaseapplock`
+
+### H2
+
+The H2 implementation uses exclusive database Locks with `SET EXCLUSIVE`
 
 ## Usage
 To use the new lockservice, simply add a dependency to the library.
