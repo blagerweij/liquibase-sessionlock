@@ -12,26 +12,6 @@ import liquibase.lockservice.DatabaseChangeLogLock;
 import java.sql.*;
 import java.util.Date;
 
-/**
- * Employs PostgreSQL <i>advisory locks</i>.
- *
- * <blockquote>
- *
- * <p>While a flag stored in a table could be used for the same purpose, advisory locks are faster,
- * avoid table bloat, and are automatically cleaned up by the server at the end of the session.
- *
- * <p>There are two ways to acquire an advisory lock in PostgreSQL: at session level or at
- * transaction level. Once acquired at session level, an advisory lock is held until explicitly
- * released or the session ends. Unlike standard lock requests, session-level advisory lock requests
- * do not honor transaction semantics: a lock acquired during a transaction that is later rolled
- * back will still be held following the rollback, and likewise an unlock is effective even if the
- * calling transaction fails later.
- *
- * </blockquote>
- *
- * @see "<a href='https://www.postgresql.org/docs/9.6/explicit-locking.html#ADVISORY-LOCKS'>Advisory
- *     Locks</a> (PostgreSQL Documentation)"
- */
 public class H2LockService extends SessionLockService {
 
   static final String SQL_TRY_LOCK = "SET EXCLUSIVE 1";
