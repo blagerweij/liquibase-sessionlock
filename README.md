@@ -49,21 +49,21 @@ grant select on SYS.GV_$SESSION to <user>;
 The MSSQL implementation used application resources locks with `sp_getapplock` and `sp_releaseapplock`
 
 ## Usage
-To use the new lockservice, simply add a dependency to the library. 
+To use the new lockservice, simply add a dependency to the library.
 In Liquibase v4.x, because the priority is higher than the StandardLockService, it will automatically be used (provided the database is supported).
 
-In Liquibase v3.7.x and above, especially when used standalone or integrated with Dropwizard framework, `com.github.blagerweij.sessionlock` string needs to be added to Liquibase classpath scanner's whitelist of packages to scan, by either system property `liquibase.scan.packages` or `Liquibase-Package` entry in MANIFEST.mf, as described [here](https://github.com/liquibase/liquibase/blob/46fc9ce9ba08806d9ad943983cc99f4f9160aeb7/liquibase-core/src/main/java/liquibase/servicelocator/ServiceLocator.java#L106) 
+In Liquibase v3.7.x and above, especially when used standalone or integrated with Dropwizard framework, `com.github.blagerweij.sessionlock` string needs to be added to Liquibase classpath scanner's whitelist of packages to scan, by either system property `liquibase.scan.packages` or `Liquibase-Package` entry in MANIFEST.mf, as described [here](https://github.com/liquibase/liquibase/blob/46fc9ce9ba08806d9ad943983cc99f4f9160aeb7/liquibase-core/src/main/java/liquibase/servicelocator/ServiceLocator.java#L106) . Please note that unit tests are performed for a few versions of Liquibase, starting from v3.5, but other versions might work as well.
 
 ### Maven
 ```xml
 <dependency>
     <groupId>com.github.blagerweij</groupId>
     <artifactId>liquibase-sessionlock</artifactId>
-    <version>1.5.1</version>
+    <version>1.6.0</version>
 </dependency>
 ```
 ### Gradle
-`implementation 'com.github.blagerweij:liquibase-sessionlock:1.5.1'`
+`implementation 'com.github.blagerweij:liquibase-sessionlock:1.6.0'`
 
 ## Disclaimer
 

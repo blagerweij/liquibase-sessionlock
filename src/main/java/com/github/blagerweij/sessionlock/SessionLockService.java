@@ -4,16 +4,19 @@
  */
 package com.github.blagerweij.sessionlock;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.SQLException;
-import liquibase.Scope;
+import java.text.DateFormat;
+import java.util.Date;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.jvm.JdbcConnection;
-import liquibase.exception.DatabaseException;
 import liquibase.exception.LockException;
 import liquibase.lockservice.DatabaseChangeLogLock;
-import liquibase.lockservice.StandardLockService;
+import liquibase.lockservice.LockService;
+import liquibase.logging.LogFactory;
 import liquibase.logging.Logger;
 
 /**
@@ -26,8 +29,8 @@ import liquibase.logging.Logger;
  * <blockquote>
  *
  * <p>If Liquibase does not exit cleanly, the lock row may be left as locked. You can clear out the
- * current lock by running <code>liquibase releaseLocks</code> which runs <code>
- * UPDATE DATABASECHANGELOGLOCK SET LOCKED=0</code>
+ * current lock by running <code>liquibase releaseLocks</code> which runs <code> UPDATE
+ * DATABASECHANGELOGLOCK SET LOCKED=0</code>
  *
  * </blockquote>
  *
@@ -37,13 +40,27 @@ import liquibase.logging.Logger;
  * <p>Subclasses need to override {@link #supports(Database)}. If {@code listLocks} necessary to
  * provide actual info, {@link #usedLock(Connection)} has to be overridden, also.
  */
-public abstract class SessionLockService extends StandardLockService {
+public abstract class SessionLockService implements LockService {
+
+  protected long changeLogLockWaitTime = 5; // max wait time in minutes
+  protected long changeLogLockRecheckTime = 5; // recheck interval in seconds
+  protected boolean hasChangeLogLock;
+  protected Database database;
 
   /** This implementation returns {@code super.getPriority() + 1}. */
   @Override
   public int getPriority() {
-    // REVISIT: PRIORITY_DATABASE?
-    return super.getPriority() + 1;
+    return PRIORITY_DEFAULT + 1;
+  }
+
+  @Override
+  public void setChangeLogLockWaitTime(long changeLogLockWaitTime) {
+    this.changeLogLockWaitTime = changeLogLockWaitTime;
+  }
+
+  @Override
+  public void setChangeLogLockRecheckTime(long changeLogLocRecheckTime) {
+    this.changeLogLockRecheckTime = changeLogLocRecheckTime;
   }
 
   /** This implementation returns {@code false}. */
@@ -52,13 +69,65 @@ public abstract class SessionLockService extends StandardLockService {
     return false;
   }
 
-  /**
-   * This implementation is a <i>no-op</i>. Suppresses creating the {@code DATABASECHANGELOGLOCK}
-   * table by the {@code StandardLockService} implementation.
-   */
   @Override
-  public void init() throws DatabaseException {
-    // no-op
+  public void waitForLock() throws LockException {
+    boolean locked = false;
+    final long timeToGiveUp = new Date().getTime() + (changeLogLockWaitTime * 1000 * 60);
+    while (!locked && (new Date().getTime() < timeToGiveUp)) {
+      locked = acquireLock();
+      if (!locked) {
+        getLog(getClass()).info("Waiting for changelog lock....");
+        try {
+          Thread.sleep(changeLogLockRecheckTime * 1000);
+        } catch (InterruptedException e) {
+          // Restore thread interrupt status
+          Thread.currentThread().interrupt();
+        }
+      }
+    }
+
+    if (!locked) {
+      DatabaseChangeLogLock[] locks = listLocks();
+      String lockedBy;
+      if (locks.length > 0) {
+        DatabaseChangeLogLock lock = locks[0];
+        lockedBy =
+            lock.getLockedBy()
+                + " since "
+                + DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT)
+                    .format(lock.getLockGranted());
+      } else {
+        lockedBy = "UNKNOWN";
+      }
+      throw new LockException(
+          "Could not acquire change log lock.  Currently locked by " + lockedBy);
+    }
+  }
+
+  @Override
+  public void forceReleaseLock() throws LockException {
+    this.init();
+    releaseLock();
+  }
+
+  @Override
+  public void reset() {
+    hasChangeLogLock = false;
+  }
+
+  @Override
+  public void destroy() {
+    reset();
+  }
+
+  @Override
+  public void setDatabase(Database database) {
+    this.database = database;
+  }
+
+  @Override
+  public void init() {
+    this.hasChangeLogLock = false;
   }
 
   private Connection getConnection() throws LockException {
@@ -79,7 +148,6 @@ public abstract class SessionLockService extends StandardLockService {
       if (acquireLock(getConnection())) {
         hasChangeLogLock = true;
         getLog(getClass()).info("Successfully acquired change log lock");
-        database.setCanCacheLiquibaseTableInfo(true);
         return true;
       }
       return false;
@@ -111,7 +179,6 @@ public abstract class SessionLockService extends StandardLockService {
       throw new LockException(e);
     } finally {
       hasChangeLogLock = false;
-      database.setCanCacheLiquibaseTableInfo(false);
     }
   }
 
@@ -139,6 +206,11 @@ public abstract class SessionLockService extends StandardLockService {
     }
   }
 
+  @Override
+  public boolean hasChangeLogLock() {
+    return hasChangeLogLock;
+  }
+
   /**
    * This implementation returns {@code null}.
    *
@@ -153,7 +225,41 @@ public abstract class SessionLockService extends StandardLockService {
     return null;
   }
 
+  /** Backwards compatibility for Liquibase 3.x */
+  private static final LogSupplier LOG_SUPPLIER;
+
+  static {
+    LogSupplier logSupplier = null;
+    try {
+      final Class<?> scopeClass = Class.forName("liquibase.Scope"); // since 3.8.0
+      final Method getCurrentScope = scopeClass.getMethod("getCurrentScope");
+      Object scope = getCurrentScope.invoke(null);
+      final Method getLog = scope.getClass().getMethod("getLog", Class.class);
+      logSupplier = c -> (Logger) getLog.invoke(scope, c);
+    } catch (NoSuchMethodException
+        | ClassNotFoundException
+        | IllegalAccessException
+        | InvocationTargetException ignored) {
+      try {
+        final Class<?> logServiceClass = Class.forName("liquibase.logging.LogService");
+        final Method getLog = logServiceClass.getMethod("getLog", Class.class);
+        logSupplier = c -> (Logger) getLog.invoke(null, c);
+      } catch (NoSuchMethodException | ClassNotFoundException e) {
+        logSupplier = c -> LogFactory.getLogger();
+      }
+    }
+    LOG_SUPPLIER = logSupplier;
+  }
+
   protected static Logger getLog(Class<?> clazz) {
-    return Scope.getCurrentScope().getLog(clazz);
+    try {
+      return LOG_SUPPLIER.getLog(clazz);
+    } catch (InvocationTargetException | IllegalAccessException e) {
+      throw new IllegalStateException(e);
+    }
+  }
+
+  interface LogSupplier {
+    Logger getLog(Class<?> clazz) throws InvocationTargetException, IllegalAccessException;
   }
 }
