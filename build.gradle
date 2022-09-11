@@ -37,6 +37,7 @@ dependencies {
             'org.junit.jupiter:junit-jupiter-api:5.7.0',
             'org.assertj:assertj-core:3.18.1',
             'org.mockito:mockito-core:3.7.0',
+            'com.h2database:h2:2.1.214',
     )
     testRuntimeOnly(
             'org.junit.jupiter:junit-jupiter-engine:5.7.0',
