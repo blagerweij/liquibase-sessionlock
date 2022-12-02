@@ -102,6 +102,8 @@ public class PGLockServiceTest {
   @Test
   @SuppressWarnings("resource")
   public void releaseSuccess() throws Exception {
+    lockService.hasChangeLogLock = true;
+
     PreparedStatement stmt = mock(PreparedStatement.class);
     ResultSet rs = booleanResult(true);
     when(stmt.executeQuery()).thenReturn(rs);
@@ -114,6 +116,8 @@ public class PGLockServiceTest {
   @Test
   @SuppressWarnings("resource")
   public void releaseFailure() throws Exception {
+    lockService.hasChangeLogLock = true;
+
     PreparedStatement stmt = mock(PreparedStatement.class);
     ResultSet rs = booleanResult(false);
     when(stmt.executeQuery()).thenReturn(rs);
