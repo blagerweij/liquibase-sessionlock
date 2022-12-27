@@ -89,6 +89,8 @@ public class MySQLLockServiceTest {
   @Test
   @SuppressWarnings("resource")
   public void releaseSuccess() throws Exception {
+    lockService.hasChangeLogLock = true;
+
     PreparedStatement stmt = mock(PreparedStatement.class);
     ResultSet rs = intResult(1);
     when(stmt.executeQuery()).thenReturn(rs);
@@ -101,6 +103,8 @@ public class MySQLLockServiceTest {
   @Test
   @SuppressWarnings("resource")
   public void releaseFailure() throws Exception {
+    lockService.hasChangeLogLock = true;
+
     PreparedStatement stmt = mock(PreparedStatement.class);
     ResultSet rs = intResult(0);
     when(stmt.executeQuery()).thenReturn(rs);

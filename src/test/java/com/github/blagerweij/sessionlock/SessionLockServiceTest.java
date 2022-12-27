@@ -129,6 +129,8 @@ public class SessionLockServiceTest {
   @Test
   @SuppressWarnings("resource")
   public void releaseShouldPropagate() throws Exception {
+    lockService.hasChangeLogLock = true;
+
     SessionLockService spyService = spy(lockService);
     SQLException cause = new SQLException("baz");
     doThrow(cause).when(spyService).releaseLock(any(Connection.class));

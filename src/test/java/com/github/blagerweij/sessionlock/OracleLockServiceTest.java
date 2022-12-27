@@ -112,6 +112,7 @@ public class OracleLockServiceTest {
   @Test
   @SuppressWarnings("resource")
   public void releaseSuccess() throws Exception {
+    lockService.hasChangeLogLock = true;
     mockAllocateLock(dbCon);
 
     CallableStatement stmt = mock(CallableStatement.class);
@@ -130,6 +131,7 @@ public class OracleLockServiceTest {
   @Test
   @SuppressWarnings("resource")
   public void releaseFailure() throws Exception {
+    lockService.hasChangeLogLock = true;
     mockAllocateLock(dbCon);
 
     CallableStatement stmt = mock(CallableStatement.class);

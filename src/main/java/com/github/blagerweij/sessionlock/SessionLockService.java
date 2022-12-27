@@ -106,8 +106,14 @@ public abstract class SessionLockService implements LockService {
 
   @Override
   public void forceReleaseLock() throws LockException {
-    this.init();
-    releaseLock();
+    try {
+      releaseLock(getConnection());
+      getLog(getClass()).info("Successfully force-released change log lock");
+    } catch (SQLException e) {
+      throw new LockException(e);
+    } finally {
+      hasChangeLogLock = false;
+    }
   }
 
   @Override
@@ -127,7 +133,6 @@ public abstract class SessionLockService implements LockService {
 
   @Override
   public void init() {
-    this.hasChangeLogLock = false;
   }
 
   private Connection getConnection() throws LockException {
@@ -141,6 +146,7 @@ public abstract class SessionLockService implements LockService {
   @Override
   public boolean acquireLock() throws LockException {
     if (hasChangeLogLock) {
+      getLog(getClass()).fine("Skipped acquiring of already existing change log lock");
       return true;
     }
 
@@ -172,6 +178,11 @@ public abstract class SessionLockService implements LockService {
 
   @Override
   public void releaseLock() throws LockException {
+    if (!hasChangeLogLock) {
+      getLog(getClass()).fine("Skipped releasing of nonexistent change log lock");
+      return;
+    }
+
     try {
       releaseLock(getConnection());
       getLog(getClass()).info("Successfully released change log lock");
