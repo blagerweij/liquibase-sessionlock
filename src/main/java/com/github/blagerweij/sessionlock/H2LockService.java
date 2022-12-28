@@ -52,22 +52,33 @@ public class H2LockService extends SessionLockService {
   }
 
   private boolean writeSessionLock(Connection con, int sessionId) throws SQLException {
+    boolean autocommitState = con.getAutoCommit();
+    try {
+      con.setAutoCommit(false);
+      LockState lockState = checkCurrentSession(con, sessionId);
+      if (lockState.equals(LockState.LOCKED)) {
+        con.setAutoCommit(autocommitState);
+        return true;
+      } else if (lockState.equals(LockState.FORBIDDEN)) {
+        removeStaleSessions(con);
+      }
 
+      tryLock(con, sessionId);
 
-    LockState lockState = checkCurrentSession(con, sessionId);
-    if (lockState.equals(LockState.LOCKED)) {
-      return true;
-    } else if (lockState.equals(LockState.FORBIDDEN)) {
-      removeStaleSessions(con);
+      lockState = checkCurrentSession(con, sessionId);
+      if (lockState.equals(LockState.LOCKED)) {
+        con.setAutoCommit(autocommitState);
+        con.commit();
+        return true;
+      }
+      con.setAutoCommit(autocommitState);
+      con.rollback();
+      return false;
+    } catch (Exception e) {
+      con.rollback();
+      con.setAutoCommit(autocommitState);
+      throw e;
     }
-
-    tryLock(con, sessionId);
-
-    lockState = checkCurrentSession(con, sessionId);
-    if (lockState.equals(LockState.LOCKED)) {
-      return true;
-    }
-    return false;
   }
 
   private void tryLock(Connection con, int sessionId) throws SQLException {
