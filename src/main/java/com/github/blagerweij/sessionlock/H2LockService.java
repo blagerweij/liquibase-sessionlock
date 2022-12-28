@@ -24,6 +24,8 @@ public class H2LockService extends SessionLockService {
   static final String SQL_TRY_LOCK = "INSERT INTO INFORMATION_SCHEMA.LOCKS (TABLE_SCHEMA, TABLE_NAME, SESSION_ID, LOCK_TYPE) VALUES (?,?,?,?)";
   static final String SQL_UNLOCK = "DELETE FROM INFORMATION_SCHEMA.LOCKS WHERE TABLE_SCHEMA = ? AND TABLE_NAME= ? AND SESSION_ID = ? AND LOCK_TYPE = ?";
 
+  private static final String LOCK_TYPE="liquibase";
+
   @Override
   public boolean supports(Database database) {
     return (database instanceof H2Database);
@@ -87,7 +89,7 @@ public class H2LockService extends SessionLockService {
     stmt.setString(1, schema);
     stmt.setString(2, database.getDatabaseChangeLogTableName());
     stmt.setInt(3, sessionId);
-    stmt.setString(4, "liquibase");
+    stmt.setString(4, LOCK_TYPE);
     ResultSet results = stmt.executeQuery();
     if (results.next()) {
       return;
@@ -96,21 +98,28 @@ public class H2LockService extends SessionLockService {
     stmt.setString(1, schema);
     stmt.setString(2, database.getDatabaseChangeLogTableName());
     stmt.setInt(3, sessionId);
-    stmt.setString(4, "liquibase");
+    stmt.setString(4, LOCK_TYPE);
     stmt.executeUpdate();
   }
 
-  private void removeStaleSessions(Connection con) {
-    throw new NotImplementedException();
+  private void removeStaleSessions(Connection con) throws SQLException {
+    String schema = getCurrentSchema(con);
+    String query = "DELETE FROM INFORMATION_SCHEMA.LOCKS " +
+      " WHERE SESSION_ID NOT IN (SELECT ID FROM INFORMATION_SCHEMA.SESSIONS) AND TABLE_SCHEMA = ? AND LOCK_TYPE = ?";
+    PreparedStatement cleanup = con.prepareStatement(query);
+    cleanup.setString(1,schema);
+    cleanup.setString(2,LOCK_TYPE);
+    cleanup.executeUpdate();
   }
 
   private LockState checkCurrentSession(Connection con, int sessionId) throws SQLException {
     String schema = getCurrentSchema(con);
-    String query = "SELECT TABLE_SCHEMA, TABLE_NAME, SESSION_ID, LOCK_TYPE FROM INFORMATION_SCHEMA.LOCKS WHERE TABLE_SCHEMA=? AND TABLE_NAME=? AND  LOCK_TYPE = ?";
+    String query = "SELECT TABLE_SCHEMA, TABLE_NAME, SESSION_ID, LOCK_TYPE FROM INFORMATION_SCHEMA.LOCKS " +
+      " WHERE TABLE_SCHEMA=? AND TABLE_NAME=? AND  LOCK_TYPE = ?";
     PreparedStatement stmt = con.prepareStatement(query);
     stmt.setString(1, schema);
     stmt.setString(2, database.getDatabaseChangeLogTableName());
-    stmt.setString(3, "liquibase");
+    stmt.setString(3, LOCK_TYPE);
     ResultSet results = stmt.executeQuery();
     if (!results.next()) {
       return LockState.NONE;
@@ -128,6 +137,7 @@ public class H2LockService extends SessionLockService {
     try (PreparedStatement stmt = con.prepareStatement("CALL SESSION_ID()")) {
       stmt.setQueryTimeout(10);
       ResultSet resultSet = stmt.executeQuery();
+      resultSet.next();
       int result = resultSet.getInt("SESSION_ID()");
       return result;
     }
@@ -137,6 +147,7 @@ public class H2LockService extends SessionLockService {
     try (PreparedStatement stmt = con.prepareStatement("CALL CURRENT_SCHEMA")) {
       stmt.setQueryTimeout(10);
       ResultSet resultSet = stmt.executeQuery();
+      resultSet.next();
       String result = resultSet.getString("CURRENT_SCHEMA");
       return result;
     }
@@ -147,11 +158,12 @@ public class H2LockService extends SessionLockService {
   protected void releaseLock(Connection con) throws SQLException, LockException {
     int sessionId = getSessionID(con);
     String schema = getCurrentSchema(con);
+
     try (PreparedStatement stmt = con.prepareStatement(SQL_UNLOCK)) {
       stmt.setString(1, schema);
-      stmt.setString(2, "databasechangelog");
+      stmt.setString(2, database.getDatabaseChangeLogTableName());
       stmt.setInt(3, sessionId);
-      stmt.setString(4, "liquibase");
+      stmt.setString(4, LOCK_TYPE);
       Boolean unlocked = stmt.executeUpdate() == 0;
       if (!Boolean.TRUE.equals(unlocked)) {
         throw new LockException(SQL_UNLOCK + " returned " + unlocked);
@@ -165,7 +177,7 @@ public class H2LockService extends SessionLockService {
   @Override
   protected DatabaseChangeLogLock usedLock(Connection con) throws SQLException, LockException {
     // Sadly there is no way to determine the actual Lockdata from the connection
-    return new DatabaseChangeLogLock(1, new Date(), "liquibase");
+    return new DatabaseChangeLogLock(1, new Date(), LOCK_TYPE);
   }
 
   private static String lockedBy(ResultSet rs) throws SQLException {
