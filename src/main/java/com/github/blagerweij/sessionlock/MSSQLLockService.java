@@ -28,10 +28,10 @@ import java.util.Locale;
  *
  * </blockquote>
  *
- * @see "<a href='https://docs.microsoft.com/en-us/sql/relational-databases/system-stored-procedures/sp-getapplock-transact-sql?view=sql-server-ver15'>
- *     Application resource loking function</a> (Microsoft SQL documentation)"
- * @see "<a href='https://docs.microsoft.com/en-us/sql/relational-databases/system-stored-procedures/sp-releaseapplock-transact-sql?view=sql-server-ver15'>
- *     Release applicaiton resource lock function</a> (Microsoft SQL documentation)"
+ * @see <a href="https://docs.microsoft.com/en-us/sql/relational-databases/system-stored-procedures/sp-getapplock-transact-sql?view=sql-server-ver15"
+ *    >Application resource locking function</a> <i>(Microsoft SQL documentation)</i>
+ * @see <a href="https://docs.microsoft.com/en-us/sql/relational-databases/system-stored-procedures/sp-releaseapplock-transact-sql?view=sql-server-ver15"
+ *    >Release applicaiton resource lock function</a> <i>(Microsoft SQL documentation)</i>
  */
 public class MSSQLLockService extends SessionLockService {
 
@@ -80,8 +80,8 @@ public class MSSQLLockService extends SessionLockService {
    * -3   - The lock request was chosen as a deadlock victim.
    * -999 - Indicates a parameter validation or other call error.
    * In current implementation exception will be thrown only with null and -999 code values.
-   * @see "<a href='https://docs.microsoft.com/en-us/sql/relational-databases/system-stored-procedures/sp-getapplock-transact-sql?view=sql-server-ver15'>
-   *          Application resource loking function</a> (Microsoft SQL documentation)"
+   * @see <a href="https://docs.microsoft.com/en-us/sql/relational-databases/system-stored-procedures/sp-getapplock-transact-sql?view=sql-server-ver15"
+   *    >Application resource locking function</a> <i>(Microsoft SQL documentation)</i>
    */
   @Override
   protected boolean acquireLock(final Connection con) throws SQLException, LockException {
@@ -106,8 +106,8 @@ public class MSSQLLockService extends SessionLockService {
    * Return code values for <code>sp_getapplock()</code>
    * 0    - Lock was successfully released.
    * -999 - Indicates parameter validation or other call error.
-   * @see "<a href='https://docs.microsoft.com/en-us/sql/relational-databases/system-stored-procedures/sp-releaseapplock-transact-sql?view=sql-server-ver15'>
-   *     Release applicaiton resource lock function</a> (Microsoft SQL documentation)"
+   * @see <a href="https://docs.microsoft.com/en-us/sql/relational-databases/system-stored-procedures/sp-releaseapplock-transact-sql?view=sql-server-ver15"
+   *    >Release applicaiton resource lock function</a> <i>(Microsoft SQL documentation)</i>
    */
   @Override
   protected void releaseLock(final Connection con) throws SQLException, LockException {
@@ -125,11 +125,10 @@ public class MSSQLLockService extends SessionLockService {
   /**
    * Obtains information about the database changelog lock.
    *
-   * @see "<a
-   *     href='https://docs.microsoft.com/en-us/sql/relational-databases/system-dynamic-management-views/sys-dm-tran-locks-transact-sql?view=sql-server-ver15'>
-   *     The sys.dm_tran_locks table</a> (Microsoft SQL documentation)"
-   * @see "<a href='https://docs.microsoft.com/en-us/sql/relational-databases/system-compatibility-views/sys-sysprocesses-transact-sql?view=sql-server-ver15'>
-   *     The sys.sysprocesses table</a> (Microsoft SQL documentation)"
+   * @see <a href="https://docs.microsoft.com/en-us/sql/relational-databases/system-dynamic-management-views/sys-dm-tran-locks-transact-sql?view=sql-server-ver15"
+   *    >The sys.dm_tran_locks table</a> <i>(Microsoft SQL documentation)</i>
+   * @see <a href="https://docs.microsoft.com/en-us/sql/relational-databases/system-compatibility-views/sys-sysprocesses-transact-sql?view=sql-server-ver15"
+   *    >The sys.sysprocesses table</a> <i>(Microsoft SQL documentation)</i>
    */
   @Override
   protected DatabaseChangeLogLock usedLock(final Connection con) throws SQLException, LockException {

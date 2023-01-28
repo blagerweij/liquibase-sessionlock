@@ -27,10 +27,10 @@ import liquibase.lockservice.DatabaseChangeLogLock;
  *
  * </blockquote>
  *
- * @see "<a href='https://dev.mysql.com/doc/refman/5.7/en/locking-functions.html'>Locking
- *     Functions</a> (MySQL 5.7 Reference Manual)"
- * @see "<a href='https://dev.mysql.com/doc/refman/8.0/en/locking-functions.html'>Locking
- *     Functions</a> (MySQL 8.0 Reference Manual)"
+ * @see <a href="https://dev.mysql.com/doc/refman/5.7/en/locking-functions.html"
+ *      >Locking Functions</a> <i>(MySQL 5.7 Reference Manual)</i>
+ * @see <a href="https://dev.mysql.com/doc/refman/8.0/en/locking-functions.html"
+ *      >Locking Functions</a> <i>(MySQL 8.0 Reference Manual)</i>
  */
 public class MySQLLockService extends SessionLockService {
 
@@ -62,9 +62,8 @@ public class MySQLLockService extends SessionLockService {
   }
 
   /**
-   * @see "<a
-   *     href='https://dev.mysql.com/doc/refman/5.7/en/locking-functions.html#function_get-lock'>
-   *     <code>GET_LOCK</code></a> (Locking Functions)"
+   * @see <a href="https://dev.mysql.com/doc/refman/5.7/en/locking-functions.html#function_get-lock"
+   *    ><code>GET_LOCK</code></a> <i>(Locking Functions)</i>
    */
   @Override
   protected boolean acquireLock(Connection con) throws SQLException, LockException {
@@ -86,9 +85,8 @@ public class MySQLLockService extends SessionLockService {
   }
 
   /**
-   * @see "<a
-   *     href='https://dev.mysql.com/doc/refman/5.7/en/locking-functions.html#function_release-lock'>
-   *     <code>RELEASE_LOCK</code></a> (Locking Functions)"
+   * @see <a href="https://dev.mysql.com/doc/refman/5.7/en/locking-functions.html#function_release-lock"
+   *    ><code>RELEASE_LOCK</code></a> <i>(Locking Functions)</i>
    */
   @Override
   protected void releaseLock(Connection con) throws SQLException, LockException {
@@ -106,11 +104,10 @@ public class MySQLLockService extends SessionLockService {
   /**
    * Obtains information about the database changelog lock.
    *
-   * @see "<a
-   *     href='https://dev.mysql.com/doc/refman/5.7/en/locking-functions.html#function_is-used-lock'>
-   *     <code>IS_USED_LOCK</code></a> (Locking Functions)"
-   * @see "<a href='https://dev.mysql.com/doc/refman/5.7/en/processlist-table.html'>The
-   *     INFORMATION_SCHEMA PROCESSLIST Table</a> (MySQL Reference Manual)"
+   * @see <a href="https://dev.mysql.com/doc/refman/5.7/en/locking-functions.html#function_is-used-lock"
+   *    ><code>IS_USED_LOCK</code></a> <i>(Locking Functions)</i>
+   * @see <a href="https://dev.mysql.com/doc/refman/5.7/en/processlist-table.html"
+   *    >The INFORMATION_SCHEMA PROCESSLIST Table</a> <i>(MySQL Reference Manual)</i>
    */
   @Override
   protected DatabaseChangeLogLock usedLock(Connection con) throws SQLException, LockException {
