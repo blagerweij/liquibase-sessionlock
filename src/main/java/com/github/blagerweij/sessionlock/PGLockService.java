@@ -32,8 +32,8 @@ import liquibase.lockservice.DatabaseChangeLogLock;
  *
  * </blockquote>
  *
- * @see "<a href='https://www.postgresql.org/docs/9.6/explicit-locking.html#ADVISORY-LOCKS'>Advisory
- *     Locks</a> (PostgreSQL Documentation)"
+ * @see <a href="https://www.postgresql.org/docs/9.6/explicit-locking.html#ADVISORY-LOCKS"
+ *      >Advisory Locks</a> <i>(PostgreSQL Documentation)</i>
  */
 public class PGLockService extends SessionLockService {
 
@@ -89,9 +89,8 @@ public class PGLockService extends SessionLockService {
   }
 
   /**
-   * @see "<a
-   *     href='https://www.postgresql.org/docs/9.6/functions-admin.html#FUNCTIONS-ADVISORY-LOCKS'>
-   *     <code>pg_try_advisory_lock</code></a> (Advisory Lock Functions)"
+   * @see <a href="https://www.postgresql.org/docs/9.6/functions-admin.html#FUNCTIONS-ADVISORY-LOCKS"
+   *    ><code>pg_try_advisory_lock</code></a> <i>(Advisory Lock Functions)</i>
    */
   @Override
   protected boolean acquireLock(Connection con) throws SQLException, LockException {
@@ -105,9 +104,8 @@ public class PGLockService extends SessionLockService {
   }
 
   /**
-   * @see "<a
-   *     href='https://www.postgresql.org/docs/9.6/functions-admin.html#FUNCTIONS-ADVISORY-LOCKS'>
-   *     <code>pg_advisory_unlock</code></a> (Advisory Lock Functions)"
+   * @see <a href="https://www.postgresql.org/docs/9.6/functions-admin.html#FUNCTIONS-ADVISORY-LOCKS"
+   *    ><code>pg_advisory_unlock</code></a> <i>(Advisory Lock Functions)</i>
    */
   @Override
   protected void releaseLock(Connection con) throws SQLException, LockException {
@@ -133,11 +131,10 @@ public class PGLockService extends SessionLockService {
    *
    * </blockquote>
    *
-   * @see "<a href='https://www.postgresql.org/docs/9.6/view-pg-locks.html'><code>pg_locks</code>
-   *     </a> (PostgreSQL Documentation)"
-   * @see "<a
-   *     href='https://www.postgresql.org/docs/9.6/monitoring-stats.html#PG-STAT-ACTIVITY-VIEW'>
-   *     <code>pg_stat_activity</code> View</a> (PostgreSQL Documentation)"
+   * @see <a href="https://www.postgresql.org/docs/9.6/view-pg-locks.html"
+   *    ><code>pg_locks</code></a> <i>(PostgreSQL Documentation)</i>
+   * @see <a href="https://www.postgresql.org/docs/9.6/monitoring-stats.html#PG-STAT-ACTIVITY-VIEW"
+   *    ><code>pg_stat_activity</code> View</a> <i>(PostgreSQL Documentation)</i>
    */
   @Override
   protected DatabaseChangeLogLock usedLock(Connection con) throws SQLException, LockException {
