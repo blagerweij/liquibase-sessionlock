@@ -144,7 +144,7 @@ public abstract class SessionLockService implements LockService {
   @Override
   public boolean acquireLock() throws LockException {
     if (hasChangeLogLock) {
-      getLog(getClass()).fine("Skipped acquiring of already existing change log lock");
+      getLog(getClass()).debug("Skipped acquiring of already existing change log lock");
       return true;
     }
 
@@ -177,7 +177,7 @@ public abstract class SessionLockService implements LockService {
   @Override
   public void releaseLock() throws LockException {
     if (!hasChangeLogLock) {
-      getLog(getClass()).fine("Skipped releasing of nonexistent change log lock");
+      getLog(getClass()).debug("Skipped releasing of nonexistent change log lock");
       return;
     }
 
