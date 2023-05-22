@@ -4,8 +4,6 @@
  */
 package com.github.blagerweij.sessionlock;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.DateFormat;
@@ -236,41 +234,7 @@ public abstract class SessionLockService implements LockService {
     return null;
   }
 
-  /** Backwards compatibility for Liquibase 3.x */
-  private static final LogSupplier LOG_SUPPLIER;
-
-  static {
-    LogSupplier logSupplier = null;
-    try {
-      final Class<?> scopeClass = Class.forName("liquibase.Scope"); // since 3.8.0
-      final Method getCurrentScope = scopeClass.getMethod("getCurrentScope");
-      Object scope = getCurrentScope.invoke(null);
-      final Method getLog = scope.getClass().getMethod("getLog", Class.class);
-      logSupplier = c -> (Logger) getLog.invoke(scope, c);
-    } catch (NoSuchMethodException
-        | ClassNotFoundException
-        | IllegalAccessException
-        | InvocationTargetException ignored) {
-      try {
-        final Class<?> logServiceClass = Class.forName("liquibase.logging.LogService");
-        final Method getLog = logServiceClass.getMethod("getLog", Class.class);
-        logSupplier = c -> (Logger) getLog.invoke(null, c);
-      } catch (NoSuchMethodException | ClassNotFoundException e) {
-        logSupplier = c -> LogFactory.getLogger();
-      }
-    }
-    LOG_SUPPLIER = logSupplier;
-  }
-
   protected static Logger getLog(Class<?> clazz) {
-    try {
-      return LOG_SUPPLIER.getLog(clazz);
-    } catch (InvocationTargetException | IllegalAccessException e) {
-      throw new IllegalStateException(e);
-    }
-  }
-
-  interface LogSupplier {
-    Logger getLog(Class<?> clazz) throws InvocationTargetException, IllegalAccessException;
+    return LogFactory.getLogger();
   }
 }
