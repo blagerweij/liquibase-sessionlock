@@ -1,14 +1,3 @@
-### FlowCrypt version changes
-- supports CockroachDB
-- supports Java 17
-- update Gradle to version 8.3
-- disabled `jacoco`, `sonarqube` & `javadocJar` in `build.gradle` file
-
-### FlowCrypt building published version
-- build jar using `gradle jar`
-- publish to Maven local repo using `gradle publishToMavenLocal`
-- copy version directory and contents of `~\.m2\repository\com\github\blagerweij\liquibase-sessionlock\1.6.5-FLOWCRYPT` to relevant project to update this jar 
-
 # Liquibase Extension: Session Lock Support
 
 Provides _session-level_ (vs. _transaction-level_)
@@ -29,7 +18,6 @@ may not be really feasible.
 -   MySQL
 -   MariaDB
 -   PostgreSQL
--   CockroachDB (using PostgreSQL driver)
 -   Oracle
 
 Support for other databases may be conveniently added by extending `SessionLockService`.
