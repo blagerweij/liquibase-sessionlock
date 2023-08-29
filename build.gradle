@@ -2,12 +2,12 @@ plugins {
     id 'java-library'
     id 'maven-publish'
     id 'signing'
-    id 'jacoco'
+//    id 'jacoco'
     id 'checkstyle'
     id 'io.github.gradle-nexus.publish-plugin' version '1.0.0'
     id 'com.softeq.gradle.itest' version '1.0.4'
     id 'net.researchgate.release' version '2.8.1'
-    id 'org.sonarqube' version '2.8'
+//    id 'org.sonarqube' version '2.8'
 }
 
 group = 'com.github.blagerweij'
@@ -60,9 +60,9 @@ dependencies {
 
 java {
     withSourcesJar()
-    withJavadocJar()
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
+//    withJavadocJar()
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
 }
 
 test {
@@ -140,13 +140,14 @@ checkstyle {
     config = project.resources.text.fromUri('https://raw.githubusercontent.com/checkstyle/checkstyle/checkstyle-8.41/src/main/resources/google_checks.xml')
 }
 
-tasks.sonarqube.dependsOn tasks.jacocoTestReport
-jacocoTestReport {
-    reports.xml.enabled true
-}
+//tasks.sonarqube.dependsOn tasks.jacocoTestReport
+//jacocoTestReport {
+//    reports.xml.enabled true
+//}
 
 artifacts {
-    archives javadocJar, sourcesJar
+//    archives javadocJar, sourcesJar
+    archives sourcesJar
 }
 
 release {
@@ -165,4 +166,3 @@ nexusPublishing {
         }
     }
 }
-

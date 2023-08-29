@@ -4,11 +4,13 @@
  */
 package com.github.blagerweij.sessionlock;
 
+import java.math.BigInteger;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.sql.Types;
 import liquibase.database.Database;
 import liquibase.database.core.PostgresDatabase;
 import liquibase.exception.DatabaseException;
@@ -37,8 +39,8 @@ import liquibase.lockservice.DatabaseChangeLogLock;
  */
 public class PGLockService extends SessionLockService {
 
-  static final String SQL_TRY_LOCK = "SELECT pg_try_advisory_lock(?,?)";
-  static final String SQL_UNLOCK = "SELECT pg_advisory_unlock(?,?)";
+  static final String SQL_TRY_LOCK = "SELECT pg_try_advisory_lock(?)";
+  static final String SQL_UNLOCK = "SELECT pg_advisory_unlock(?)";
   static final String SQL_LOCK_INFO =
       "SELECT l.pid,"
           + " a.client_hostname,"
@@ -68,17 +70,17 @@ public class PGLockService extends SessionLockService {
     }
   }
 
-  private int[] getChangeLogLockId() throws LockException {
+  private BigInteger getChangeLogLockId() throws LockException {
     String defaultSchemaName = database.getDefaultSchemaName();
     if (defaultSchemaName == null) {
       throw new LockException("Default schema name is not set for current DB user/connection");
     }
     // Unlike the general Object.hashCode() contract,
     // String.hashCode() should be stable across VM instances and Java versions.
-    return new int[] {
-      database.getDatabaseChangeLogLockTableName().hashCode(),
-      defaultSchemaName.hashCode()
-    };
+    BigInteger changeLogLockTableHashCode = BigInteger.valueOf(database.getDatabaseChangeLogLockTableName().hashCode());
+    BigInteger schemaHashCode = BigInteger.valueOf(defaultSchemaName.hashCode());
+    BigInteger shiftedChangeLogLockTableHashCode = changeLogLockTableHashCode.shiftLeft(64);
+    return shiftedChangeLogLockTableHashCode.add(schemaHashCode);
   }
 
   private static Boolean getBooleanResult(PreparedStatement stmt) throws SQLException {
@@ -95,9 +97,8 @@ public class PGLockService extends SessionLockService {
   @Override
   protected boolean acquireLock(Connection con) throws SQLException, LockException {
     try (PreparedStatement stmt = con.prepareStatement(SQL_TRY_LOCK)) {
-      int[] lockId = getChangeLogLockId();
-      stmt.setInt(1, lockId[0]);
-      stmt.setInt(2, lockId[1]);
+      BigInteger lockId = getChangeLogLockId();
+      stmt.setObject(1, lockId, Types.BIGINT);
 
       return Boolean.TRUE.equals(getBooleanResult(stmt));
     }
@@ -110,9 +111,8 @@ public class PGLockService extends SessionLockService {
   @Override
   protected void releaseLock(Connection con) throws SQLException, LockException {
     try (PreparedStatement stmt = con.prepareStatement(SQL_UNLOCK)) {
-      int[] lockId = getChangeLogLockId();
-      stmt.setInt(1, lockId[0]);
-      stmt.setInt(2, lockId[1]);
+      BigInteger lockId = getChangeLogLockId();
+      stmt.setObject(1, lockId, Types.BIGINT);
 
       Boolean unlocked = getBooleanResult(stmt);
       if (!Boolean.TRUE.equals(unlocked)) {
@@ -139,9 +139,8 @@ public class PGLockService extends SessionLockService {
   @Override
   protected DatabaseChangeLogLock usedLock(Connection con) throws SQLException, LockException {
     try (PreparedStatement stmt = con.prepareStatement(SQL_LOCK_INFO)) {
-      int[] lockId = getChangeLogLockId();
-      stmt.setInt(1, lockId[0]);
-      stmt.setInt(2, lockId[1]);
+      BigInteger lockId = getChangeLogLockId();
+      stmt.setObject(1, lockId, Types.BIGINT);
 
       try (ResultSet rs = stmt.executeQuery()) {
         if (!rs.next()) {
