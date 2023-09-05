@@ -116,7 +116,13 @@ public abstract class SessionLockService implements LockService {
 
   @Override
   public void reset() {
-    hasChangeLogLock = false;
+    try {
+      if (hasChangeLogLock) {
+        forceReleaseLock();
+      }
+    } catch (LockException e) {
+        getLog(getClass()).debug("Could not reset lock, ignoring", e);
+    }
   }
 
   @Override
