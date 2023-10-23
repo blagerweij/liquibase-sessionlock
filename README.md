@@ -13,6 +13,10 @@ connection drops, and overcome the shortcoming of the
 Running `liquibase releaseLocks` in a micro-service production environment
 may not be really feasible.
 
+[![Java CI with Gradle](https://github.com/blagerweij/liquibase-sessionlock/actions/workflows/ci.yml/badge.svg)](https://github.com/blagerweij/liquibase-sessionlock/actions/workflows/ci.yml "Java CI with Gradle")
+[![Maven Central](https://img.shields.io/maven-central/v/com.github.blagerweij/liquibase-sessionlock.svg)](https://search.maven.org/artifact/com.github.blagerweij/liquibase-sessionlock/ "Maven Central")
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/blagerweij/liquibase-sessionlock/blob/master/LICENSE "Apache License 2.0")
+
 ## Supported Databases
 
 -   MySQL
@@ -63,7 +67,17 @@ In Liquibase v3.7.x and above, especially when used standalone or integrated wit
 </dependency>
 ```
 ### Gradle
-`implementation 'com.github.blagerweij:liquibase-sessionlock:1.6.5'`
+```groovy
+implementation 'com.github.blagerweij:liquibase-sessionlock:1.6.5'
+```
+
+<details>
+<summary>with Kotlin DSL</summary>
+
+```kotlin
+implementation("com.github.blagerweij:liquibase-sessionlock:1.6.5")
+```
+</details>
 
 ## Disclaimer
 
