@@ -157,6 +157,17 @@ release {
     }
 }
 
+updateVersion.doFirst {
+    // Maven
+    ant.replaceregexp(match:'<version>(\\d+(?:\\.\\d+)+)</version>', replace:"<version>${version}</version>", flags:'g', byline:true) {
+        fileset(dir: '.', includes: 'README.md')
+    }
+    // Gradle
+    ant.replaceregexp(match:'com\\.github\\.blagerweij\\:liquibase-sessionlock\\:(\\d+(?:\\.\\d+)+)', replace:"com\\.github\\.blagerweij\\:liquibase-sessionlock:${version}", flags:'g', byline:true) {
+        fileset(dir: '.', includes: 'README.md')
+    }
+}
+
 nexusPublishing {
     repositories {
         sonatype {
