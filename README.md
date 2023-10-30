@@ -79,9 +79,5 @@ implementation("com.github.blagerweij:liquibase-sessionlock:1.6.7")
 ```
 </details>
 
-## Disclaimer
-
-_This module, both source code and documentation, is in the Public Domain, and comes with **NO WARRANTY**._
-
 ## License
 This module is using the Apache Software License, version 2.0. See http://www.apache.org/licenses/LICENSE-2.0.txt
