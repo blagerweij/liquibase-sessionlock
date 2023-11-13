@@ -49,8 +49,9 @@ public class MySQLLockService extends SessionLockService {
 
   private String getChangeLogLockName() {
     // MySQL 5.7 and later enforces a maximum length on lock names of 64 characters.
-    return (database.getDefaultSchemaName() + "." + database.getDatabaseChangeLogLockTableName())
-        .toUpperCase(Locale.ROOT);
+    String changeLogLockName = (database.getDefaultSchemaName() + "." + database.getDatabaseChangeLogLockTableName())
+            .toUpperCase(Locale.ROOT);
+    return changeLogLockName.substring(0, Math.min(changeLogLockName.length(), CHANGE_LOG_LOCK_NAME));
   }
 
   private static Integer getIntegerResult(PreparedStatement stmt) throws SQLException {
