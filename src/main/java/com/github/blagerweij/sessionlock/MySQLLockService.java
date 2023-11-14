@@ -10,10 +10,15 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.Locale;
+
+import com.github.blagerweij.sessionlock.util.StringUtils;
 import liquibase.database.Database;
 import liquibase.database.core.MySQLDatabase;
 import liquibase.exception.LockException;
 import liquibase.lockservice.DatabaseChangeLogLock;
+
+import static com.github.blagerweij.sessionlock.util.StringUtils.toUpperCase;
+import static com.github.blagerweij.sessionlock.util.StringUtils.truncate;
 
 /**
  * Employs MySQL user-level (a.k.a.&#x20;application-level or advisory) locks.
@@ -47,10 +52,9 @@ public class MySQLLockService extends SessionLockService {
     return (database instanceof MySQLDatabase);
   }
 
-  private String getChangeLogLockName() {
+  protected String getChangeLogLockName() {
     // MySQL 5.7 and later enforces a maximum length on lock names of 64 characters.
-    return (database.getDefaultSchemaName() + "." + database.getDatabaseChangeLogLockTableName())
-        .toUpperCase(Locale.ROOT);
+    return toUpperCase(truncate((database.getDefaultSchemaName() + "." + database.getDatabaseChangeLogLockTableName()), 64));
   }
 
   private static Integer getIntegerResult(PreparedStatement stmt) throws SQLException {
@@ -96,7 +100,7 @@ public class MySQLLockService extends SessionLockService {
       Integer unlocked = getIntegerResult(stmt);
       if (!Integer.valueOf(1).equals(unlocked)) {
         throw new LockException(
-            "RELEASE_LOCK() returned " + String.valueOf(unlocked).toUpperCase(Locale.ROOT));
+            "RELEASE_LOCK() returned " + toUpperCase(String.valueOf(unlocked)));
       }
     }
   }
