@@ -63,19 +63,19 @@ In Liquibase v3.7.x and above, especially when used standalone or integrated wit
 <dependency>
     <groupId>com.github.blagerweij</groupId>
     <artifactId>liquibase-sessionlock</artifactId>
-    <version>1.6.8</version>
+    <version>1.6.9</version>
 </dependency>
 ```
 ### Gradle
 ```groovy
-implementation 'com.github.blagerweij:liquibase-sessionlock:1.6.8'
+implementation 'com.github.blagerweij:liquibase-sessionlock:1.6.9'
 ```
 
 <details>
 <summary>with Kotlin DSL</summary>
 
 ```kotlin
-implementation("com.github.blagerweij:liquibase-sessionlock:1.6.8")
+implementation("com.github.blagerweij:liquibase-sessionlock:1.6.9")
 ```
 </details>
 
