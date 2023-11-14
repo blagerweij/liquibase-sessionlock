@@ -16,6 +16,8 @@ import java.sql.SQLException;
 import java.util.Date;
 import java.util.Locale;
 
+import static com.github.blagerweij.sessionlock.util.StringUtils.toUpperCase;
+
 /**
  * Employs MSSQL application resource locks.
  *
@@ -59,8 +61,7 @@ public class MSSQLLockService extends SessionLockService {
   }
 
   private String getChangeLogLockName() {
-    return (database.getDefaultSchemaName() + "." + database.getDatabaseChangeLogLockTableName())
-        .toUpperCase(Locale.ROOT);
+    return toUpperCase(database.getDefaultSchemaName() + "." + database.getDatabaseChangeLogLockTableName());
   }
 
   private static Integer getIntegerResult(PreparedStatement stmt) throws SQLException {
@@ -117,7 +118,7 @@ public class MSSQLLockService extends SessionLockService {
       Integer unlocked = getIntegerResult(stmt);
       if (!Integer.valueOf(0).equals(unlocked)) {
         throw new LockException(
-            "RELEASE_LOCK() returned " + String.valueOf(unlocked).toUpperCase(Locale.ROOT));
+            "RELEASE_LOCK() returned " + toUpperCase(String.valueOf(unlocked)));
       }
     }
   }

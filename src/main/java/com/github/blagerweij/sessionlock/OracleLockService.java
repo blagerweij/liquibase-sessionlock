@@ -16,6 +16,8 @@ import liquibase.database.core.OracleDatabase;
 import liquibase.exception.LockException;
 import liquibase.lockservice.DatabaseChangeLogLock;
 
+import static com.github.blagerweij.sessionlock.util.StringUtils.toUpperCase;
+
 /**
  * Employs Oracle user-level (a.k.a.&#x20;application-level or advisory) locks.
  *
@@ -40,8 +42,7 @@ public class OracleLockService extends SessionLockService {
   }
 
   private String getChangeLogLockName() {
-    return (database.getLiquibaseCatalogName() + "." + database.getDatabaseChangeLogLockTableName())
-        .toUpperCase(Locale.ROOT);
+    return toUpperCase(database.getLiquibaseCatalogName() + "." + database.getDatabaseChangeLogLockTableName());
   }
 
   /**

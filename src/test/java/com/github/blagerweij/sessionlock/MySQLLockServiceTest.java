@@ -6,6 +6,8 @@ package com.github.blagerweij.sessionlock;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -22,18 +24,20 @@ import liquibase.exception.LockException;
 import liquibase.lockservice.DatabaseChangeLogLock;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 
 public class MySQLLockServiceTest {
 
   private MySQLLockService lockService;
 
   private Connection dbCon;
+  private MySQLDatabase database;
 
-  @BeforeEach
+    @BeforeEach
   public void setUp() {
     dbCon = mock(Connection.class);
 
-    MySQLDatabase database = new MySQLDatabase();
+    database = new MySQLDatabase();
     database.setDefaultCatalogName("test_schema");
     database = spy(database);
     when(database.getConnection()).thenReturn(new JdbcConnection(dbCon));
@@ -85,6 +89,22 @@ public class MySQLLockServiceTest {
 
     assertThatThrownBy(() -> lockService.acquireLock()).isInstanceOf(LockException.class);
   }
+
+    @Test
+    @SuppressWarnings("resource")
+    public void lockNameTooLongShouldFail() throws Exception {
+      database.setDefaultCatalogName("this_name_is_too_long_and_should_be_truncated_since_mysql_does_not_like_long_locknames");
+      PreparedStatement stmt = mock(PreparedStatement.class);
+      ResultSet rs = mock(ResultSet.class);
+      when(stmt.executeQuery()).thenReturn(rs);
+      when(dbCon.prepareStatement(MySQLLockService.SQL_GET_LOCK)).thenReturn(stmt);
+      ArgumentCaptor<String> lockNameCaptor = ArgumentCaptor.forClass(String.class);
+      doNothing().when(stmt).setString(eq(1), lockNameCaptor.capture());
+      when(rs.next()).thenReturn(true, false);
+      when(rs.getObject(1)).thenReturn(1);
+      assertThat(lockService.acquireLock()).isTrue();
+      assertThat(lockNameCaptor.getValue()).isEqualTo("THIS_NAME_IS_TOO_LONG_AND_SHOULD_BE_TRUNCATED_SINCE_MYSQL_DOES_N");
+    }
 
   @Test
   @SuppressWarnings("resource")
